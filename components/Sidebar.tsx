@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Ticket, Siren, BookOpen,
   BarChart2, Settings, ChevronLeft, ChevronRight,
-  Activity, Plus,
+  Activity, Plus, Users,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -14,6 +14,7 @@ const ALL_NAV = [
   { href: "/dashboard/incidents", icon: Siren,           label: "Incidentes", roles: ["ANALYST", "MANAGER"]              },
   { href: "/dashboard/catalog",   icon: BookOpen,        label: "Catálogo",   roles: ["REQUESTER", "ANALYST", "MANAGER"] },
   { href: "/dashboard/reports",   icon: BarChart2,       label: "Reportes",   roles: ["MANAGER"]                         },
+  { href: "/dashboard/users",     icon: Users,           label: "Usuarios",   roles: ["ANALYST", "MANAGER"]              },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
