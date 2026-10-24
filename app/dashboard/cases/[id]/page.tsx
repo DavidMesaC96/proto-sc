@@ -5,14 +5,19 @@ import { prisma } from "@/lib/prisma";
 import StatusBadge from "@/components/StatusBadge";
 import PriorityBadge from "@/components/PriorityBadge";
 import CaseActions from "./CaseActions";
+import PageHeader from "@/components/PageHeader";
+import { ChevronRight, Zap, FileText, RefreshCw, Clock, Building2 } from "lucide-react";
 
-const CAT_LABEL: Record<string, string> = { INCIDENT: "Incidente", REQUEST: "Solicitud", CHANGE: "Cambio" };
-const CAT_ICON:  Record<string, string> = { INCIDENT: "⚡", REQUEST: "📋", CHANGE: "🔁" };
+const CAT: Record<string, { label: string; Icon: React.ElementType }> = {
+  INCIDENT: { label: "Incidente",  Icon: Zap       },
+  REQUEST:  { label: "Solicitud",  Icon: FileText   },
+  CHANGE:   { label: "Cambio",     Icon: RefreshCw  },
+};
 
-const ROLE_COLOR: Record<string, { bg: string; color: string }> = {
-  REQUESTER: { bg: "#EEF0FF", color: "#5B4FE8" },
-  ANALYST:   { bg: "#F0FDF4", color: "#16A34A" },
-  MANAGER:   { bg: "#FFFBEB", color: "#D97706" },
+const ROLE_STYLE: Record<string, { bg: string; color: string }> = {
+  REQUESTER: { bg: "var(--sky-dim)",   color: "var(--sky)"   },
+  ANALYST:   { bg: "var(--green-dim)", color: "var(--green)" },
+  MANAGER:   { bg: "var(--amber-dim)", color: "var(--amber)" },
 };
 
 export default async function CaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,82 +41,135 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   if (!c) notFound();
   if (user.role === "REQUESTER" && c.requesterId !== user.id) redirect("/dashboard");
 
+  const cat = CAT[c.category];
+
   return (
-    <div className="anim-up">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm mb-6" style={{ color: "var(--text-3)" }}>
-        <Link href="/dashboard" className="bc-link" style={{ color: "var(--text-3)", textDecoration: "none" }}>
-          Soporte
-        </Link>
-        <span>/</span>
-        <span className="truncate max-w-xs" style={{ color: "var(--text-1)", fontWeight: 500 }}>{c.title}</span>
-      </div>
+    <div className="fade-up">
+      <PageHeader
+        title={c.title}
+        subtitle={`Dashboard › Tickets › detalle`}
+        userName={user.name}
+        userRole={user.role}
+        showNewTicket={false}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* ── Main ── */}
-        <div className="lg:col-span-2 space-y-4">
+      {/* 3-column layout */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr 300px", gap: 20, alignItems: "start" }}>
 
-          {/* Case card */}
-          <div className="card overflow-hidden">
-            <div className="px-7 py-6" style={{ borderBottom: "1px solid var(--border)" }}>
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <h1 className="font-bold text-xl leading-snug" style={{ color: "var(--text-1)" }}>
-                  {c.title}
-                </h1>
+        {/* ── Left: metadata & actions ── */}
+        <div className="space-y-4">
+          {/* Case meta */}
+          <div className="glass-card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
+            <div>
+              <p className="hint uppercase tracking-widest mb-3" style={{ fontSize: ".7rem" }}>Detalles</p>
+              <div className="flex flex-wrap gap-2 mb-3">
                 <StatusBadge status={c.status} />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <span
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  style={{ background: "var(--bg)", color: "var(--text-2)", border: "1px solid var(--border)" }}
-                >
-                  {CAT_ICON[c.category]} {CAT_LABEL[c.category] ?? c.category}
-                </span>
                 <PriorityBadge priority={c.priority} />
-                {c.estimatedTime && (
-                  <span
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
-                    style={{ background: "var(--bg)", color: "var(--text-2)", border: "1px solid var(--border)" }}
-                  >
-                    ⏱ {c.estimatedTime}h estimadas
-                  </span>
-                )}
               </div>
+              {cat && (
+                <div className="flex items-center gap-1.5" style={{ color: "var(--text-3)" }}>
+                  <cat.Icon size={12} />
+                  <span className="hint">{cat.label}</span>
+                </div>
+              )}
             </div>
-            <div className="px-7 py-5">
-              <p className="text-sm leading-relaxed" style={{ color: "var(--text-2)" }}>
-                {c.description}
+
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+              <div className="flex items-center gap-2 mb-1">
+                <Clock size={12} style={{ color: "var(--text-3)", flexShrink: 0 }} />
+                <span className="hint" style={{ fontSize: ".68rem" }}>CREADO</span>
+              </div>
+              <p className="text-sm" style={{ color: "var(--text-2)" }}>
+                {new Date(c.createdAt).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })}
               </p>
             </div>
+
+            {c.estimatedTime && (
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                <p className="hint mb-1" style={{ fontSize: ".68rem" }}>TIEMPO EST.</p>
+                <p className="text-sm font-bold" style={{ color: "var(--cyan)" }}>{c.estimatedTime}h</p>
+              </div>
+            )}
           </div>
 
-          {/* Escalation notice */}
+          {/* Requester */}
+          <div className="glass-card" style={{ padding: 24 }}>
+            <p className="hint uppercase tracking-widest mb-4" style={{ fontSize: ".7rem" }}>Solicitante</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+              <div
+                style={{ width: 40, height: 40, borderRadius: 999, flexShrink: 0, background: "var(--cyan-dim)", color: "var(--cyan)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: ".82rem" }}
+              >
+                {c.requester.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
+              </div>
+              <div>
+                <p style={{ fontSize: ".92rem", fontWeight: 700, color: "var(--text-1)" }}>{c.requester.name}</p>
+                <p className="hint" style={{ fontSize: ".76rem" }}>{c.requester.email}</p>
+              </div>
+            </div>
+            {c.requester.department && (
+              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                <Building2 size={13} style={{ color: "var(--text-3)" }} />
+                <span className="hint" style={{ fontSize: ".82rem" }}>{c.requester.department}</span>
+              </div>
+            )}
+            {c.requester.phone && (
+              <p className="hint" style={{ marginTop: 6, fontSize: ".82rem", color: "var(--cyan)" }}>{c.requester.phone}</p>
+            )}
+          </div>
+
+          {/* Assignee */}
+          <div className="glass-card" style={{ padding: 24 }}>
+            <p className="hint uppercase tracking-widest mb-4" style={{ fontSize: ".7rem" }}>Asignado a</p>
+            {c.assignedTo ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{ width: 36, height: 36, borderRadius: 999, flexShrink: 0, background: "var(--green-dim)", color: "var(--green)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: ".76rem" }}
+                >
+                  {c.assignedTo.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
+                </div>
+                <p style={{ fontSize: ".92rem", fontWeight: 600, color: "var(--text-1)" }}>{c.assignedTo.name}</p>
+              </div>
+            ) : (
+              <p className="hint" style={{ fontSize: ".88rem" }}>Sin asignar</p>
+            )}
+          </div>
+        </div>
+
+        {/* ── Center: description + timeline ── */}
+        <div className="space-y-4">
+          {/* Description */}
+          <div className="glass-card" style={{ padding: 28 }}>
+            <h1 style={{ fontWeight: 900, fontSize: "1.35rem", letterSpacing: "-.02em", lineHeight: 1.2, color: "var(--text-1)", marginBottom: 12 }}>{c.title}</h1>
+            <p style={{ fontSize: ".92rem", lineHeight: 1.7, color: "var(--text-2)" }}>{c.description}</p>
+          </div>
+
+          {/* Escalation */}
           {c.escalation && (
             <div
-              className="card px-6 py-5 anim-up d1"
-              style={{ border: "1px solid #FDE68A", background: "var(--amber-lt)" }}
+              className="glass-card fade-in"
+              style={{ padding: 20, border: "1px solid rgba(245,158,11,.3)", background: "var(--amber-dim)" }}
             >
-              <div className="flex items-start gap-4">
-                <span className="text-2xl mt-0.5">🔗</span>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">🔗</span>
                 <div className="flex-1">
-                  <p className="font-semibold text-sm mb-3" style={{ color: "#92400E" }}>
-                    Escalado a proveedor externo
+                  <p className="font-semibold text-sm mb-3" style={{ color: "var(--amber)" }}>
+                    Escalado a proveedor
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     {[
-                      ["Proveedor",  c.escalation.provider.name],
-                      ["Tipo",       c.escalation.provider.type],
-                      ["Enviado",    new Date(c.escalation.sentAt).toLocaleDateString("es-CO")],
-                      ["Estado",     c.escalation.status],
+                      ["Proveedor", c.escalation.provider.name],
+                      ["Tipo",      c.escalation.provider.type],
+                      ["Enviado",   new Date(c.escalation.sentAt).toLocaleDateString("es-CO")],
+                      ["Estado",    c.escalation.status],
                     ].map(([k, v]) => (
                       <div key={k}>
-                        <p className="text-xs font-semibold uppercase tracking-wide mb-0.5" style={{ color: "#B45309" }}>{k}</p>
-                        <p className="text-sm font-semibold" style={{ color: "#78350F" }}>{v}</p>
+                        <p className="hint mb-0.5" style={{ fontSize: ".65rem" }}>{k}</p>
+                        <p className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>{v}</p>
                       </div>
                     ))}
                   </div>
                   {c.escalation.notes && (
-                    <p className="text-sm mt-4 pt-4" style={{ color: "#92400E", borderTop: "1px solid #FDE68A" }}>
+                    <p className="text-sm mt-3 pt-3" style={{ color: "var(--text-2)", borderTop: "1px solid rgba(245,158,11,.2)" }}>
                       {c.escalation.notes}
                     </p>
                   )}
@@ -120,53 +178,40 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
             </div>
           )}
 
-          {/* Timeline */}
-          <div className="card px-7 py-6">
-            <p className="text-xs font-bold uppercase tracking-widest mb-6" style={{ color: "var(--text-3)" }}>
+          {/* Activity feed */}
+          <div className="glass-card" style={{ padding: 28 }}>
+            <p className="hint uppercase tracking-widest" style={{ fontSize: ".7rem", marginBottom: 22 }}>
               Actividad · {c.updates.length} entrada{c.updates.length !== 1 ? "s" : ""}
             </p>
 
-            <div className="space-y-6">
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {c.updates.map((u, i) => {
-                const rc       = ROLE_COLOR[u.author.role] ?? { bg: "#F1F5F9", color: "#64748B" };
+                const rs = ROLE_STYLE[u.author.role] ?? { bg: "var(--surface-2)", color: "var(--text-2)" };
                 const initials = u.author.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
-                const isLast   = i === c.updates.length - 1;
                 return (
-                  <div key={u.id} className={`flex gap-4 anim-left d${Math.min(i + 1, 6)}`}>
-                    {/* Avatar + connector */}
-                    <div className="flex flex-col items-center flex-shrink-0">
+                  <div key={u.id} className={`slide-r d${Math.min(i + 1, 6)}`} style={{ display: "flex", gap: 14 }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
                       <div
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                        style={{ background: rc.bg, color: rc.color }}
+                        style={{ width: 36, height: 36, borderRadius: 999, flexShrink: 0, background: rs.bg, color: rs.color, fontSize: ".72rem", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         {initials}
                       </div>
-                      {!isLast && (
-                        <div
-                          className="flex-1 w-px mt-2"
-                          style={{ background: "var(--border)", minHeight: "20px" }}
-                        />
+                      {i < c.updates.length - 1 && (
+                        <div style={{ width: 1, flex: 1, marginTop: 6, background: "var(--border)", minHeight: 16 }} />
                       )}
                     </div>
-
-                    {/* Content */}
-                    <div className="flex-1 pb-1">
-                      <div className="flex items-center flex-wrap gap-2 mb-2">
-                        <span className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>
+                    <div style={{ flex: 1, paddingBottom: 4 }}>
+                      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+                        <span style={{ fontSize: ".92rem", fontWeight: 700, color: "var(--text-1)" }}>
                           {u.author.name}
                         </span>
-                        {u.newStatus && u.oldStatus !== u.newStatus && (
-                          <StatusBadge status={u.newStatus} />
-                        )}
-                        <span className="text-xs ml-auto" style={{ color: "var(--text-3)" }}>
-                          {new Date(u.createdAt).toLocaleString("es-CO", {
-                            day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
-                          })}
+                        {u.newStatus && u.oldStatus !== u.newStatus && <StatusBadge status={u.newStatus} />}
+                        <span className="hint" style={{ marginLeft: "auto", fontSize: ".76rem" }}>
+                          {new Date(u.createdAt).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
                       <p
-                        className="text-sm leading-relaxed px-4 py-3 rounded-xl"
-                        style={{ background: "var(--bg)", color: "var(--text-2)" }}
+                        style={{ fontSize: ".88rem", lineHeight: 1.65, padding: "12px 16px", borderRadius: 10, background: "var(--surface-2)", color: "var(--text-2)" }}
                       >
                         {u.message}
                       </p>
@@ -178,44 +223,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
           </div>
         </div>
 
-        {/* ── Sidebar ── */}
-        <div className="space-y-4">
-          {/* Details */}
-          <div className="card px-6 py-5">
-            <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--text-3)" }}>
-              Detalles del caso
-            </p>
-            <div className="space-y-4">
-              <Detail label="Creado"
-                value={new Date(c.createdAt).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })} />
-              <Detail label="Actualizado"
-                value={new Date(c.updatedAt).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })} />
-
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
-                <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: "var(--text-3)" }}>
-                  Solicitante
-                </p>
-                <p className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>{c.requester.name}</p>
-                {c.requester.department && (
-                  <p className="text-xs mt-0.5" style={{ color: "var(--text-3)" }}>{c.requester.department}</p>
-                )}
-                {c.requester.phone && (
-                  <p className="text-xs mt-0.5" style={{ color: "var(--accent)" }}>{c.requester.phone}</p>
-                )}
-              </div>
-
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}>
-                <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: "var(--text-3)" }}>
-                  Asignado a
-                </p>
-                <p className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>
-                  {c.assignedTo?.name ?? "Sin asignar"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
+        {/* ── Right: actions ── */}
+        <div>
           {user.role !== "REQUESTER" && (
             <CaseActions
               caseId={c.id}
@@ -226,15 +235,6 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-wide mb-0.5" style={{ color: "var(--text-3)" }}>{label}</p>
-      <p className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>{value}</p>
     </div>
   );
 }

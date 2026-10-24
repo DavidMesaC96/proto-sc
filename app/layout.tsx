@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mesa de Ayuda · Sistecrédito",
+  title: "Mesa de Servicios · Sistecrédito",
   description: "Gestión de solicitudes e incidentes",
 };
 

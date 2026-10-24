@@ -1,34 +1,35 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, AlertTriangle, Building2 } from "lucide-react";
 
 interface Props { caseId: string; currentStatus: string; hasEscalation: boolean; userId: string; }
 interface Provider { id: string; name: string; type: string; }
 
 const STATUSES = [
-  { value: "OPEN",             label: "Abierto",          color: "#94A3B8" },
-  { value: "IN_PROGRESS",      label: "En gestión",       color: "#5B4FE8" },
-  { value: "WAITING_USER",     label: "Esp. usuario",     color: "#EA580C" },
-  { value: "RESOLVED",         label: "Resuelto",         color: "#16A34A" },
-  { value: "CLOSED",           label: "Cerrado",          color: "#94A3B8" },
+  { value: "OPEN",         label: "Abierto",      color: "var(--text-3)" },
+  { value: "IN_PROGRESS",  label: "En gestión",   color: "var(--sky)"   },
+  { value: "WAITING_USER", label: "Esp. usuario", color: "var(--amber)" },
+  { value: "RESOLVED",     label: "Resuelto",     color: "var(--green)" },
+  { value: "CLOSED",       label: "Cerrado",      color: "var(--text-3)" },
 ];
 
 export default function CaseActions({ caseId, currentStatus, hasEscalation }: Props) {
   const router = useRouter();
-  const [tab,           setTab]          = useState<"update" | "escalate">("update");
-  const [status,        setStatus]       = useState(currentStatus);
-  const [message,       setMessage]      = useState("");
-  const [providers,     setProviders]    = useState<Provider[]>([]);
-  const [providerId,    setProviderId]   = useState("");
-  const [escNotes,      setEscNotes]     = useState("");
-  const [loading,       setLoading]      = useState(false);
-  const [feedback,      setFeedback]     = useState<{ ok: boolean; msg: string } | null>(null);
+  const [tab,        setTab]       = useState<"update" | "escalate">("update");
+  const [status,     setStatus]    = useState(currentStatus);
+  const [message,    setMessage]   = useState("");
+  const [providers,  setProviders] = useState<Provider[]>([]);
+  const [provId,     setProvId]    = useState("");
+  const [notes,      setNotes]     = useState("");
+  const [loading,    setLoading]   = useState(false);
+  const [feedback,   setFeedback]  = useState<{ ok: boolean; msg: string } | null>(null);
 
   useEffect(() => { fetch("/api/providers").then(r => r.json()).then(setProviders); }, []);
 
   function flash(ok: boolean, msg: string) {
     setFeedback({ ok, msg });
-    setTimeout(() => { setFeedback(null); if (ok) router.refresh(); }, 1400);
+    setTimeout(() => { setFeedback(null); if (ok) router.refresh(); }, 1500);
   }
 
   async function saveUpdate(e: React.FormEvent) {
@@ -40,40 +41,41 @@ export default function CaseActions({ caseId, currentStatus, hasEscalation }: Pr
       body: JSON.stringify({ status, message }),
     });
     setLoading(false);
-    if (!res.ok) { flash(false, "No se pudo actualizar"); return; }
-    setMessage(""); flash(true, "Actualizado correctamente");
+    if (!res.ok) { flash(false, "Error al actualizar"); return; }
+    setMessage(""); flash(true, "Actualizado");
   }
 
   async function saveEscalate(e: React.FormEvent) {
     e.preventDefault();
-    if (!providerId) { flash(false, "Selecciona un proveedor"); return; }
+    if (!provId) { flash(false, "Selecciona un proveedor"); return; }
     setLoading(true);
     const res = await fetch(`/api/cases/${caseId}/escalate`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ providerId, notes: escNotes }),
+      body: JSON.stringify({ providerId: provId, notes }),
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) { flash(false, data.error || "Error al escalar"); return; }
-    flash(true, "Caso escalado al proveedor");
+    if (!res.ok) { flash(false, data.error || "Error"); return; }
+    flash(true, "Escalado correctamente");
   }
 
   return (
     <div className="card overflow-hidden">
       {/* Tabs */}
-      <div className="flex" style={{ borderBottom: "1px solid var(--border)" }}>
+      <div style={{ display: "flex", borderBottom: "1px solid var(--border)", background: "var(--surface-1)" }}>
         {[
-          { id: "update" as const,  label: "Actualizar" },
+          { id: "update"  as const, label: "Actualizar" },
           ...(!hasEscalation ? [{ id: "escalate" as const, label: "Escalar" }] : []),
         ].map(t => (
           <button
             key={t.id}
             onClick={() => { setTab(t.id); setFeedback(null); }}
-            className="flex-1 py-3 text-xs font-semibold transition-colors"
             style={{
-              color:        tab === t.id ? "var(--accent)" : "var(--text-3)",
-              borderBottom: tab === t.id ? "2px solid var(--accent)" : "2px solid transparent",
-              background:   tab === t.id ? "var(--accent-lt)" : "transparent",
+              flex: 1, padding: "12px 8px", fontSize: ".82rem", fontWeight: 700,
+              transition: "all .15s", border: "none", cursor: "pointer",
+              color:        tab === t.id ? "#002B7A"   : "var(--text-3)",
+              borderBottom: tab === t.id ? "2px solid #002B7A" : "2px solid transparent",
+              background:   tab === t.id ? "rgba(0,43,122,.06)" : "transparent",
             }}
           >
             {t.label}
@@ -81,32 +83,28 @@ export default function CaseActions({ caseId, currentStatus, hasEscalation }: Pr
         ))}
       </div>
 
-      <div className="p-5">
+      <div className="p-4">
         {tab === "update" && (
-          <form onSubmit={saveUpdate} className="space-y-4">
-            {/* Status selector */}
+          <form onSubmit={saveUpdate} className="space-y-3">
+            {/* Status list */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide mb-2.5" style={{ color: "var(--text-3)" }}>
-                Estado
-              </p>
-              <div className="space-y-1.5">
+              <p className="hint uppercase tracking-widest mb-2" style={{ fontSize: ".62rem" }}>Estado</p>
+              <div className="space-y-1">
                 {STATUSES.map(s => (
                   <button
                     key={s.value} type="button"
                     onClick={() => setStatus(s.value)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all text-sm"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all"
                     style={{
-                      background:   status === s.value ? `${s.color}12` : "transparent",
-                      border:       `1.5px solid ${status === s.value ? s.color : "var(--border)"}`,
+                      background:   status === s.value ? `${s.color}18` : "transparent",
+                      border:       `1px solid ${status === s.value ? s.color : "transparent"}`,
                     }}
                   >
-                    <span className="dot flex-shrink-0" style={{ background: status === s.value ? s.color : "var(--border-md)" }} />
+                    <span className="p-dot" style={{ background: status === s.value ? s.color : "var(--text-3)" }} />
                     <span className="font-medium" style={{ color: status === s.value ? s.color : "var(--text-2)" }}>
                       {s.label}
                     </span>
-                    {status === s.value && (
-                      <span className="ml-auto text-xs font-bold" style={{ color: s.color }}>✓</span>
-                    )}
+                    {status === s.value && <CheckCircle2 size={11} className="ml-auto" style={{ color: s.color }} />}
                   </button>
                 ))}
               </div>
@@ -114,74 +112,70 @@ export default function CaseActions({ caseId, currentStatus, hasEscalation }: Pr
 
             {/* Comment */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-3)" }}>
+              <p className="hint uppercase tracking-widest mb-1.5" style={{ fontSize: ".62rem" }}>
                 Comentario <span style={{ color: "var(--red)" }}>*</span>
               </p>
               <textarea
                 rows={3} value={message}
                 onChange={e => setMessage(e.target.value)}
-                className="field resize-none text-sm"
+                className="field text-sm"
                 placeholder="Describe la acción realizada..."
               />
             </div>
 
-            <Feedback data={feedback} />
+            {feedback && <FeedbackBar data={feedback} />}
 
-            <button type="submit" disabled={loading} className="btn btn-primary w-full">
-              {loading ? <><span className="spinner" /> Guardando...</> : "Guardar"}
+            <button type="submit" disabled={loading} className="btn btn-cyan w-full text-sm">
+              {loading ? <><span className="p-dot pulse" style={{ background: "#fff" }} /> Guardando...</> : "Guardar"}
             </button>
           </form>
         )}
 
         {tab === "escalate" && (
-          <form onSubmit={saveEscalate} className="space-y-4">
+          <form onSubmit={saveEscalate} className="space-y-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide mb-2.5" style={{ color: "var(--text-3)" }}>
+              <p className="hint uppercase tracking-widest mb-2" style={{ fontSize: ".62rem" }}>
                 Proveedor <span style={{ color: "var(--red)" }}>*</span>
               </p>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {providers.map(p => (
                   <button
                     key={p.id} type="button"
-                    onClick={() => setProviderId(p.id)}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all"
+                    onClick={() => setProvId(p.id)}
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all"
                     style={{
-                      border:     `1.5px solid ${providerId === p.id ? "var(--amber)" : "var(--border)"}`,
-                      background: providerId === p.id ? "var(--amber-lt)" : "transparent",
+                      background: provId === p.id ? "rgba(245,158,11,.08)" : "var(--surface-1)",
+                      border: `1px solid ${provId === p.id ? "var(--amber)" : "var(--border-md)"}`,
                     }}
                   >
-                    <span className="text-base">🏢</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate" style={{ color: "var(--text-1)" }}>{p.name}</p>
-                      <p className="text-xs" style={{ color: "var(--text-3)" }}>{p.type}</p>
+                    <Building2 size={13} style={{ color: provId === p.id ? "var(--amber)" : "var(--text-3)", flexShrink: 0 }} />
+                    <div className="text-left flex-1 min-w-0">
+                      <p className="font-semibold truncate" style={{ color: "var(--text-1)", fontSize: ".8rem" }}>{p.name}</p>
+                      <p className="hint" style={{ fontSize: ".65rem" }}>{p.type}</p>
                     </div>
-                    {providerId === p.id && (
-                      <span className="text-xs font-bold flex-shrink-0" style={{ color: "var(--amber)" }}>✓</span>
-                    )}
+                    {provId === p.id && <CheckCircle2 size={11} style={{ color: "var(--amber)", flexShrink: 0 }} />}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-3)" }}>
-                Notas para el proveedor
-              </p>
+              <p className="hint uppercase tracking-widest mb-1.5" style={{ fontSize: ".62rem" }}>Notas</p>
               <textarea
-                rows={3} value={escNotes}
-                onChange={e => setEscNotes(e.target.value)}
-                className="field resize-none text-sm"
-                placeholder="Contexto adicional..."
+                rows={3} value={notes}
+                onChange={e => setNotes(e.target.value)}
+                className="field text-sm"
+                placeholder="Contexto para el proveedor..."
               />
             </div>
 
-            <Feedback data={feedback} />
+            {feedback && <FeedbackBar data={feedback} />}
 
             <button type="submit" disabled={loading}
-              className="btn w-full"
-              style={{ background: "var(--amber)", color: "#fff", boxShadow: "0 2px 8px rgba(217,119,6,.3)" }}
+              className="btn w-full text-sm"
+              style={{ background: "var(--amber-dim)", color: "var(--amber)", border: "1px solid rgba(245,158,11,.3)" }}
             >
-              {loading ? <><span className="spinner" /> Escalando...</> : "🔗 Escalar caso"}
+              {loading ? <><span className="p-dot pulse" style={{ background: "var(--amber)" }} /> Escalando...</> : "🔗 Escalar caso"}
             </button>
           </form>
         )}
@@ -190,17 +184,17 @@ export default function CaseActions({ caseId, currentStatus, hasEscalation }: Pr
   );
 }
 
-function Feedback({ data }: { data: { ok: boolean; msg: string } | null }) {
-  if (!data) return null;
+function FeedbackBar({ data }: { data: { ok: boolean; msg: string } }) {
+  const Icon = data.ok ? CheckCircle2 : AlertTriangle;
   return (
     <div
-      className="flex items-center gap-2 text-xs font-semibold px-3 py-2.5 rounded-lg anim-up"
+      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold fade-in"
       style={{
-        background: data.ok ? "var(--green-lt)" : "var(--red-lt)",
-        color:      data.ok ? "var(--green)"    : "var(--red)",
+        background: data.ok ? "var(--green-dim)" : "var(--red-dim)",
+        color:      data.ok ? "var(--green)"     : "var(--red)",
       }}
     >
-      <span>{data.ok ? "✓" : "⚠"}</span> {data.msg}
+      <Icon size={12} /> {data.msg}
     </div>
   );
 }

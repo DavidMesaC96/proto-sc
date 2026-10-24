@@ -1,23 +1,17 @@
-const cfg: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  OPEN:             { label: "Abierto",        color: "#64748B", bg: "#F1F5F9", dot: "#94A3B8" },
-  IN_PROGRESS:      { label: "En gestión",     color: "#5B4FE8", bg: "#EEF0FF", dot: "#5B4FE8" },
-  WAITING_PROVIDER: { label: "Con proveedor",  color: "#D97706", bg: "#FFFBEB", dot: "#F59E0B" },
-  WAITING_USER:     { label: "Esp. usuario",   color: "#EA580C", bg: "#FFF7ED", dot: "#F97316" },
-  RESOLVED:         { label: "Resuelto",       color: "#16A34A", bg: "#F0FDF4", dot: "#22C55E" },
-  CLOSED:           { label: "Cerrado",        color: "#94A3B8", bg: "#F8FAFC", dot: "#CBD5E1" },
+const CFG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  OPEN:             { label: "Abierto",       color: "#2563EB", bg: "rgba(59,130,246,.10)",  dot: "#3B82F6" },
+  IN_PROGRESS:      { label: "En gestión",    color: "#D97706", bg: "rgba(245,158,11,.10)",  dot: "#F59E0B" },
+  WAITING_PROVIDER: { label: "Con proveedor", color: "#7C3AED", bg: "rgba(139,92,246,.10)",  dot: "#8B5CF6" },
+  WAITING_USER:     { label: "Esp. usuario",  color: "#D97706", bg: "rgba(245,158,11,.10)",  dot: "#F59E0B" },
+  RESOLVED:         { label: "Resuelto",      color: "#059669", bg: "rgba(16,185,129,.10)",  dot: "#10B981" },
+  CLOSED:           { label: "Cerrado",       color: "#6B7280", bg: "rgba(107,114,128,.10)", dot: "#9CA3AF" },
 };
 
 export default function StatusBadge({ status }: { status: string }) {
-  const s = cfg[status] ?? { label: status, color: "#64748B", bg: "#F1F5F9", dot: "#94A3B8" };
+  const s = CFG[status] ?? { label: status, color: "#6B7280", bg: "rgba(107,114,128,.10)", dot: "#9CA3AF" };
   return (
-    <span
-      className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-      style={{ color: s.color, background: s.bg }}
-    >
-      <span
-        className="dot dot-blink"
-        style={{ background: s.dot }}
-      />
+    <span className="pill" style={{ color: s.color, background: s.bg }}>
+      <span className="p-dot pulse" style={{ background: s.dot }} />
       {s.label}
     </span>
   );

@@ -42,7 +42,7 @@ export default function Navbar({ userName, userRole }: { userName: string; userR
             className="hidden sm:inline text-xs px-2 py-0.5 rounded-full font-medium"
             style={{ background: "var(--accent-lt)", color: "var(--accent)" }}
           >
-            Mesa de Ayuda
+            Mesa de Servicios
           </span>
         </Link>
 

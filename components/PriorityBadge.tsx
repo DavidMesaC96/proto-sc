@@ -1,17 +1,14 @@
-const cfg: Record<string, { label: string; color: string; bg: string }> = {
-  LOW:      { label: "Baja",    color: "#94A3B8", bg: "#F8FAFC" },
-  MEDIUM:   { label: "Media",   color: "#5B4FE8", bg: "#EEF0FF" },
-  HIGH:     { label: "Alta",    color: "#EA580C", bg: "#FFF7ED" },
-  CRITICAL: { label: "Crítica", color: "#DC2626", bg: "#FEF2F2" },
+const CFG: Record<string, { label: string; color: string; bg: string }> = {
+  LOW:      { label: "Baja",    color: "#6B7280", bg: "rgba(107,114,128,.08)" },
+  MEDIUM:   { label: "Media",   color: "#2563EB", bg: "rgba(59,130,246,.10)"  },
+  HIGH:     { label: "Alta",    color: "#D97706", bg: "rgba(245,158,11,.10)"  },
+  CRITICAL: { label: "Crítica", color: "#DC2626", bg: "rgba(239,68,68,.10)"   },
 };
 
 export default function PriorityBadge({ priority }: { priority: string }) {
-  const p = cfg[priority] ?? { label: priority, color: "#94A3B8", bg: "#F8FAFC" };
+  const p = CFG[priority] ?? { label: priority, color: "#6B7280", bg: "rgba(107,114,128,.08)" };
   return (
-    <span
-      className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-      style={{ color: p.color, background: p.bg }}
-    >
+    <span className="pill" style={{ color: p.color, background: p.bg }}>
       {p.label}
     </span>
   );
