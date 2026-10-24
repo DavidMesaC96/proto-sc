@@ -1,14 +1,18 @@
-const config: Record<string, { label: string; className: string }> = {
-  LOW:      { label: "Baja",     className: "bg-slate-100 text-slate-600" },
-  MEDIUM:   { label: "Media",    className: "bg-blue-100 text-blue-600" },
-  HIGH:     { label: "Alta",     className: "bg-orange-100 text-orange-700" },
-  CRITICAL: { label: "Crítica",  className: "bg-red-100 text-red-700" },
+const config: Record<string, { label: string; bg: string; color: string; icon: string }> = {
+  LOW:      { label: "Baja",    bg: "#f8fafc", color: "#64748b", icon: "↓" },
+  MEDIUM:   { label: "Media",   bg: "#eff6ff", color: "#1d4ed8", icon: "→" },
+  HIGH:     { label: "Alta",    bg: "#fff7ed", color: "#c2410c", icon: "↑" },
+  CRITICAL: { label: "Crítica", bg: "#fef2f2", color: "#b91c1c", icon: "‼" },
 };
 
 export default function PriorityBadge({ priority }: { priority: string }) {
-  const p = config[priority] ?? { label: priority, className: "bg-gray-100 text-gray-600" };
+  const p = config[priority] ?? { label: priority, bg: "#f1f5f9", color: "#475569", icon: "·" };
   return (
-    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.className}`}>
+    <span
+      className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+      style={{ background: p.bg, color: p.color }}
+    >
+      <span className="font-bold">{p.icon}</span>
       {p.label}
     </span>
   );

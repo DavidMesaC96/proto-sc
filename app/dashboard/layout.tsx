@@ -7,7 +7,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!user) redirect("/login");
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: "#f8fafc" }}>
       <Navbar userName={user.name} userRole={user.role} />
       <main className="flex-1 p-6 max-w-6xl mx-auto w-full">{children}</main>
     </div>

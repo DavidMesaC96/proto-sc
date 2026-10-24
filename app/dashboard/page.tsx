@@ -22,92 +22,138 @@ export default async function DashboardPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const stats = {
-    open: cases.filter((c) => c.status === "OPEN").length,
-    inProgress: cases.filter((c) => c.status === "IN_PROGRESS").length,
-    waitingProvider: cases.filter((c) => c.status === "WAITING_PROVIDER").length,
-    resolved: cases.filter((c) => ["RESOLVED", "CLOSED"].includes(c.status)).length,
-  };
+  const stats = [
+    { label: "Abiertos",     value: cases.filter(c => c.status === "OPEN").length,                         icon: "📋", bg: "#f1f5f9", color: "#0f172a", bar: "#94a3b8" },
+    { label: "En gestión",   value: cases.filter(c => c.status === "IN_PROGRESS").length,                  icon: "⚙",  bg: "#eff6ff", color: "#1e40af", bar: "#3b82f6" },
+    { label: "Con proveedor",value: cases.filter(c => c.status === "WAITING_PROVIDER").length,             icon: "🔗", bg: "#fefce8", color: "#78350f", bar: "#f59e0b" },
+    { label: "Resueltos",    value: cases.filter(c => ["RESOLVED","CLOSED"].includes(c.status)).length,    icon: "✓",  bg: "#f0fdf4", color: "#14532d", bar: "#22c55e" },
+  ];
+
+  const total = cases.length || 1;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Mis casos</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Panel de casos</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {cases.length === 0 ? "Sin casos registrados" : `${cases.length} caso${cases.length !== 1 ? "s" : ""} en total`}
+          </p>
+        </div>
         <Link
           href="/dashboard/cases/new"
-          className="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-800 transition-colors"
+          className="btn-press inline-flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all"
+          style={{
+            background: "linear-gradient(135deg, #1d4ed8, #2563eb)",
+            boxShadow: "0 4px 14px rgba(37,99,235,0.35)",
+          }}
         >
-          + Nuevo caso
+          <span className="text-base">+</span> Nuevo caso
         </Link>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: "Abiertos", value: stats.open, color: "text-gray-700 bg-gray-100" },
-          { label: "En gestión", value: stats.inProgress, color: "text-blue-700 bg-blue-50" },
-          { label: "Con proveedor", value: stats.waitingProvider, color: "text-yellow-700 bg-yellow-50" },
-          { label: "Resueltos", value: stats.resolved, color: "text-green-700 bg-green-50" },
-        ].map((s) => (
-          <div key={s.label} className={`rounded-xl p-4 ${s.color}`}>
-            <p className="text-3xl font-bold">{s.value}</p>
-            <p className="text-sm mt-1">{s.label}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((s, i) => (
+          <div
+            key={s.label}
+            className={`rounded-2xl p-5 animate-fade-in stagger-${i + 1} card-hover`}
+            style={{ background: s.bg }}
+          >
+            <div className="flex items-start justify-between mb-3">
+              <span className="text-2xl">{s.icon}</span>
+              <span className="text-3xl font-bold" style={{ color: s.color }}>{s.value}</span>
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: s.color, opacity: 0.7 }}>
+              {s.label}
+            </p>
+            {/* Progress bar */}
+            <div className="mt-3 h-1 bg-black/10 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${Math.round((s.value / total) * 100)}%`, background: s.bar }}
+              />
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Cases table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* Cases list */}
+      <div
+        className="rounded-2xl overflow-hidden animate-fade-in stagger-5"
+        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.04)" }}
+      >
         {cases.length === 0 ? (
-          <div className="p-12 text-center text-gray-400">
-            <p className="text-lg">No hay casos registrados</p>
-            <p className="text-sm mt-1">Crea el primero usando el botón de arriba.</p>
+          <div
+            className="flex flex-col items-center justify-center py-20 text-center"
+            style={{ background: "#fff" }}
+          >
+            <div className="text-6xl mb-4">📭</div>
+            <p className="text-gray-700 font-semibold text-lg">Sin casos aún</p>
+            <p className="text-gray-400 text-sm mt-1 mb-6">Crea el primer caso usando el botón de arriba.</p>
+            <Link
+              href="/dashboard/cases/new"
+              className="text-sm text-white font-semibold px-5 py-2 rounded-xl"
+              style={{ background: "#1d4ed8" }}
+            >
+              + Crear primer caso
+            </Link>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Caso</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Estado</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Prioridad</th>
-                {user.role !== "REQUESTER" && (
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Solicitante</th>
-                )}
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Tiempo est.</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Fecha</th>
+          <table className="w-full text-sm bg-white">
+            <thead>
+              <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+                {["Caso", "Estado", "Prioridad", ...(user.role !== "REQUESTER" ? ["Solicitante"] : []), "Est.", "Fecha"].map(h => (
+                  <th
+                    key={h}
+                    className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "#94a3b8", background: "#fafafa" }}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
-              {cases.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/dashboard/cases/${c.id}`}
-                      className="font-medium text-blue-700 hover:underline"
-                    >
-                      {c.title}
+            <tbody>
+              {cases.map((c, i) => (
+                <tr
+                  key={c.id}
+                  className={`group transition-colors animate-fade-in stagger-${Math.min(i + 1, 6)}`}
+                  style={{ borderBottom: "1px solid #f8fafc" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#fafbff")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "")}
+                >
+                  <td className="px-5 py-4">
+                    <Link href={`/dashboard/cases/${c.id}`} className="group/link">
+                      <p className="font-semibold text-gray-800 group-hover/link:text-blue-700 transition-colors line-clamp-1">
+                        {c.title}
+                      </p>
+                      {c.escalation && (
+                        <span className="text-xs font-medium" style={{ color: "#d97706" }}>
+                          ↗ {c.escalation.provider.name}
+                        </span>
+                      )}
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {c._count.updates} actualización{c._count.updates !== 1 ? "es" : ""}
+                      </p>
                     </Link>
-                    {c.escalation && (
-                      <span className="ml-2 text-xs text-yellow-600 font-medium">
-                        ↗ {c.escalation.provider.name}
-                      </span>
-                    )}
                   </td>
-                  <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
-                  <td className="px-4 py-3"><PriorityBadge priority={c.priority} /></td>
+                  <td className="px-5 py-4"><StatusBadge status={c.status} /></td>
+                  <td className="px-5 py-4"><PriorityBadge priority={c.priority} /></td>
                   {user.role !== "REQUESTER" && (
-                    <td className="px-4 py-3 text-gray-600">
-                      {c.requester.name}
+                    <td className="px-5 py-4">
+                      <p className="font-medium text-gray-700">{c.requester.name}</p>
                       {c.requester.department && (
-                        <span className="text-gray-400 text-xs ml-1">· {c.requester.department}</span>
+                        <p className="text-xs text-gray-400">{c.requester.department}</p>
                       )}
                     </td>
                   )}
-                  <td className="px-4 py-3 text-gray-500">
+                  <td className="px-5 py-4 text-gray-500 font-medium">
                     {c.estimatedTime ? `${c.estimatedTime}h` : "—"}
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">
-                    {new Date(c.createdAt).toLocaleDateString("es-CO")}
+                  <td className="px-5 py-4 text-xs text-gray-400">
+                    {new Date(c.createdAt).toLocaleDateString("es-CO", { day: "2-digit", month: "short" })}
                   </td>
                 </tr>
               ))}
