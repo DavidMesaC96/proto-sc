@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String
+  email         String       @unique
+  password      String
+  role          Role         @default(REQUESTER)
+  department    String?
+  phone         String?
+  createdAt     DateTime     @default(now())
+
+  cases         Case[]       @relation("RequesterCases")
+  assignedCases Case[]       @relation("AssignedCases")
+  updates       CaseUpdate[]
+  sessions      Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Provider {
+  id          String       @id @default(cuid())
+  name        String
+  type        String
+  email       String
+  phone       String?
+  createdAt   DateTime     @default(now())
+
+  escalations Escalation[]
+}
+
+model Case {
+  id            String       @id @default(cuid())
+  title         String
+  description   String
+  category      String
+  priority      String
+  status        String       @default("OPEN")
+  estimatedTime Int?
+  requesterId   String
+  assignedToId  String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  closedAt      DateTime?
+
+  requester     User         @relation("RequesterCases", fields: [requesterId], references: [id])
+  assignedTo    User?        @relation("AssignedCases", fields: [assignedToId], references: [id])
+  updates       CaseUpdate[]
+  escalation    Escalation?
+}
+
+model CaseUpdate {
+  id        String   @id @default(cuid())
+  caseId    String
+  authorId  String
+  message   String
+  oldStatus String?
+  newStatus String?
+  createdAt DateTime @default(now())
+
+  case      Case     @relation(fields: [caseId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id])
+}
+
+model Escalation {
+  id         String    @id @default(cuid())
+  caseId     String    @unique
+  providerId String
+  sentAt     DateTime  @default(now())
+  status     String    @default("PENDING")
+  notes      String?
+  resolvedAt DateTime?
+
+  case       Case      @relation(fields: [caseId], references: [id])
+  provider   Provider  @relation(fields: [providerId], references: [id])
+}
+
+enum Role {
+  REQUESTER
+  ANALYST
+  MANAGER
+}
