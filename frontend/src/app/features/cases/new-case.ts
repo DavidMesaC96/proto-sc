@@ -1,29 +1,27 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
+import { LucideChevronRight, LucideFileText, LucideRefreshCw, LucideZap } from '@lucide/angular';
 import { CasesService } from '../../core/cases.service';
 import { errorMessage } from '../../core/http-error';
-import { CATEGORY_ICON, CATEGORY_LABEL, CaseCategory, Priority } from '../../core/models';
+import { CaseCategory, Priority } from '../../core/models';
 
-const CATEGORY_HINT: Record<CaseCategory, string> = {
-  INCIDENT: 'Algo dejó de funcionar',
-  REQUEST: 'Necesito algo nuevo',
-  CHANGE: 'Modificar un sistema',
-};
+const CATS: { value: CaseCategory; label: string; hint: string }[] = [
+  { value: 'INCIDENT', label: 'Incidente', hint: 'Algo dejó de funcionar' },
+  { value: 'REQUEST', label: 'Solicitud', hint: 'Necesito algo nuevo' },
+  { value: 'CHANGE', label: 'Cambio', hint: 'Modificar un sistema' },
+];
 
-const PRIORITIES: { value: Priority; label: string; hint: string; color: string }[] = [
-  { value: 'LOW', label: 'Baja', hint: 'Puede esperar', color: '#6B7280' },
-  { value: 'MEDIUM', label: 'Media', hint: 'Resolver en 24h', color: '#0EA5E9' },
-  { value: 'HIGH', label: 'Alta', hint: 'Resolver en 8h', color: '#F59E0B' },
-  { value: 'CRITICAL', label: 'Crítica', hint: 'Atención inmediata', color: '#EF4444' },
+const PRIOS: { value: Priority; label: string; hint: string; color: string; dot: string }[] = [
+  { value: 'LOW', label: 'Baja', hint: 'Puede esperar', color: 'var(--text-3)', dot: '#4E6078' },
+  { value: 'MEDIUM', label: 'Media', hint: 'Resolver en 24h', color: 'var(--sky)', dot: '#0EA5E9' },
+  { value: 'HIGH', label: 'Alta', hint: 'Resolver en 8h', color: 'var(--amber)', dot: '#F59E0B' },
+  { value: 'CRITICAL', label: 'Crítica', hint: 'Atención inmediata', color: 'var(--red)', dot: '#EF4444' },
 ];
 
 @Component({
   selector: 'app-new-case',
-  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputTextModule, TextareaModule],
+  imports: [ReactiveFormsModule, RouterLink, LucideChevronRight, LucideZap, LucideFileText, LucideRefreshCw],
   templateUrl: './new-case.html',
   styleUrl: './new-case.css',
 })
@@ -31,13 +29,8 @@ export class NewCase {
   private readonly casesApi = inject(CasesService);
   private readonly router = inject(Router);
 
-  protected readonly categories = (Object.keys(CATEGORY_LABEL) as CaseCategory[]).map((value) => ({
-    value,
-    label: CATEGORY_LABEL[value],
-    hint: CATEGORY_HINT[value],
-    icon: CATEGORY_ICON[value],
-  }));
-  protected readonly priorities = PRIORITIES;
+  protected readonly cats = CATS;
+  protected readonly prios = PRIOS;
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(120)]],

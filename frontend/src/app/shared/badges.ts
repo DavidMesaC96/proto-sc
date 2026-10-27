@@ -1,12 +1,12 @@
 import { Component, computed, input } from '@angular/core';
 import { CaseStatus, PRIORITY_STYLE, Priority, STATUS_STYLE } from '../core/models';
 
-const FALLBACK = { color: '#6B7280', bg: 'rgba(107,114,128,.10)' };
+const FALLBACK = { color: '#6B7280', bg: 'rgba(107,114,128,.10)', dot: '#9CA3AF' };
 
 @Component({
   selector: 'app-status-badge',
   template: `<span class="pill" [style.color]="style().color" [style.background]="style().bg">
-    <span class="dot" [style.background]="style().color"></span>{{ style().label }}
+    <span class="p-dot pulse" [style.background]="style().dot"></span>{{ style().label }}
   </span>`,
 })
 export class StatusBadge {

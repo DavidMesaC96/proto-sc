@@ -47,12 +47,12 @@ async function setup(inputs: { status?: string; priority?: string } = {}) {
 }
 
 const rowTitles = (el: HTMLElement) =>
-  Array.from(el.querySelectorAll('tr.row a.title')).map((a) => a.textContent?.trim());
+  Array.from(el.querySelectorAll('a.row .t')).map((p) => p.textContent?.trim());
 
 describe('CasesList', () => {
-  it('muestra todos los casos sin filtros', async () => {
+  it('muestra todos los casos, los más críticos primero', async () => {
     const f = await setup();
-    expect(rowTitles(f.nativeElement)).toEqual(['VPN caída', 'Impresora', 'Correo lento']);
+    expect(rowTitles(f.nativeElement)).toEqual(['VPN caída', 'Correo lento', 'Impresora']);
   });
 
   it('filtra por estado desde la URL', async () => {
@@ -72,12 +72,9 @@ describe('CasesList', () => {
     expect(counts).toEqual(['3', '2', '0', '0', '0', '1']);
   });
 
-  it('busca por título', async () => {
-    const f = await setup();
-    const input = f.nativeElement.querySelector('input[type=search]') as HTMLInputElement;
-    input.value = 'vpn';
-    input.dispatchEvent(new Event('input'));
-    f.detectChanges();
-    expect(rowTitles(f.nativeElement)).toEqual(['VPN caída']);
+  it('muestra el estado vacío cuando ningún caso coincide', async () => {
+    const f = await setup({ status: 'RESOLVED' });
+    expect(rowTitles(f.nativeElement)).toEqual([]);
+    expect(f.nativeElement.textContent).toContain('Sin tickets');
   });
 });

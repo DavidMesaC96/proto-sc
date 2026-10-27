@@ -1,62 +1,110 @@
+<ng-template #icon let-name>
+  @switch (name) {
+    @case ('dashboard') { <svg lucideLayoutDashboard [size]="21" [strokeWidth]="1.8"></svg> }
+    @case ('ticket') { <svg lucideTicket [size]="21" [strokeWidth]="1.8"></svg> }
+    @case ('siren') { <svg lucideSiren [size]="21" [strokeWidth]="1.8"></svg> }
+    @case ('book') { <svg lucideBookOpen [size]="21" [strokeWidth]="1.8"></svg> }
+    @case ('chart') { <svg lucideChartNoAxesColumn [size]="21" [strokeWidth]="1.8"></svg> }
+    @case ('users') { <svg lucideUsers [size]="21" [strokeWidth]="1.8"></svg> }
+  }
+</ng-template>
+
 <div class="shell">
-  <aside class="sidebar" [class.collapsed]="collapsed()">
-    <div class="brand">
+  <aside class="sidebar" [class.col]="collapsed()">
+    <!-- Logo -->
+    <div class="logo">
       @if (collapsed()) {
-        <span class="brand-mark" aria-label="Mesa de Servicios">+</span>
+        <div class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <rect x="7.5" y="1" width="3" height="16" rx="1.5" fill="#002B7A" />
+            <rect x="1" y="7.5" width="16" height="3" rx="1.5" fill="#002B7A" />
+          </svg>
+        </div>
       } @else {
         <img src="logo-sistecredito.png" alt="Sistecrédito" />
       }
     </div>
 
+    <!-- Navegación -->
     <nav class="nav" aria-label="Navegación principal">
-      <a routerLink="/cases" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" title="Tickets">
-        <i class="pi pi-ticket"></i>
-        @if (!collapsed()) {
-          <span>Tickets</span>
+      @for (item of nav(); track item.path) {
+        @if (item.ready) {
+          <a [routerLink]="item.path" routerLinkActive="active" class="nav-link" [attr.title]="collapsed() ? item.label : null">
+            <span class="tile">
+              <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{ $implicit: item.icon }" />
+            </span>
+            @if (!collapsed()) {
+              <span class="label">{{ item.label }}</span>
+              <span class="bar"></span>
+            }
+          </a>
+        } @else {
+          <span class="nav-link soon" title="Próximamente" aria-disabled="true">
+            <span class="tile">
+              <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{ $implicit: item.icon }" />
+            </span>
+            @if (!collapsed()) {
+              <span class="label">{{ item.label }}</span>
+            }
+          </span>
         }
-      </a>
+      }
     </nav>
 
-    <div class="sidebar-foot">
-      <a routerLink="/cases/new" class="new-ticket" title="Nuevo ticket">
-        <i class="pi pi-plus"></i>
+    <div class="spacer"></div>
+
+    <!-- Health Status + Nuevo ticket -->
+    <div class="actions">
+      <span class="health soon" title="Próximamente" aria-disabled="true">
+        <span class="health-ico">
+          <span class="health-tile"><svg lucideActivity [size]="17" [strokeWidth]="2"></svg></span>
+          <span class="health-dot"></span>
+        </span>
         @if (!collapsed()) {
-          <span>Nuevo ticket</span>
+          <span class="health-txt">
+            <strong>Health Status</strong>
+            <small>Sauron · Grafana Stack</small>
+          </span>
         }
+      </span>
+
+      <a routerLink="/cases/new" class="new-ticket" [class.col]="collapsed()">
+        <svg lucidePlus [size]="14" [strokeWidth]="2.5"></svg>
+        @if (!collapsed()) { Nuevo ticket }
       </a>
-      <button
-        type="button"
-        class="collapse"
-        (click)="toggle()"
-        [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'"
-      >
-        <i class="pi" [class.pi-angle-right]="collapsed()" [class.pi-angle-left]="!collapsed()"></i>
+    </div>
+
+    <!-- Usuario, ajustes y colapsar -->
+    <div class="foot" [class.col]="collapsed()">
+      @if (!collapsed() && user()) {
+        <div class="user-card">
+          <div class="user-av">{{ initials() }}</div>
+          <div class="user-txt">
+            <p>{{ firstName() }}</p>
+            <small>{{ roleLabel() }}</small>
+          </div>
+        </div>
+      }
+
+      <span class="nav-link soon" title="Próximamente" aria-disabled="true">
+        <span class="tile"><svg lucideSettings [size]="21" [strokeWidth]="1.8"></svg></span>
+        @if (!collapsed()) { <span class="label">Ajustes</span> }
+      </span>
+
+      <button type="button" class="nav-link collapse" (click)="toggle()" [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'">
+        <span class="tile dim">
+          @if (collapsed()) {
+            <svg lucideChevronRight [size]="19" [strokeWidth]="1.8"></svg>
+          } @else {
+            <svg lucideChevronLeft [size]="19" [strokeWidth]="1.8"></svg>
+          }
+        </span>
+        @if (!collapsed()) { <span class="label dim">Colapsar</span> }
       </button>
     </div>
   </aside>
 
-  <div class="main">
-    <header class="topbar">
-      <span class="topbar-title">Mesa de Servicios</span>
-      <div class="user">
-        <div class="avatar user-avatar">{{ initials() }}</div>
-        <div class="user-info">
-          <p class="user-name">{{ user()?.name }}</p>
-          <p class="hint">{{ roleLabel() }}</p>
-        </div>
-        <p-button
-          icon="pi pi-sign-out"
-          [text]="true"
-          severity="secondary"
-          (onClick)="logout()"
-          ariaLabel="Cerrar sesión"
-          title="Cerrar sesión"
-        />
-      </div>
-    </header>
-
-    <main class="content">
-      <router-outlet />
-    </main>
-  </div>
+  <main class="app-main">
+    <router-outlet />
+  </main>
 </div>

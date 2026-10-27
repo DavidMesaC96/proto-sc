@@ -1,92 +1,258 @@
-<div class="card actions">
-  <div class="tabs" role="tablist">
-    <button type="button" role="tab" [class.active]="tab() === 'update'" (click)="selectTab('update')">
-      Actualizar
-    </button>
-    @if (!hasEscalation()) {
-      <button type="button" role="tab" [class.active]="tab() === 'escalate'" (click)="selectTab('escalate')">
-        Escalar
-      </button>
+<div class="ca-panel">
+  <!-- ═════ Cabecera ═════ -->
+  <div class="ca-head">
+    <div class="ca-row ca-between" style="margin-bottom: 14px">
+      <span class="cd-cap" style="color: rgba(255, 255, 255, 0.6)">Gestión del ticket</span>
+      <span class="ca-chip" style="background: rgba(255, 255, 255, 0.12); color: #fff">
+        <span class="p-dot" [style.background]="pr().color"></span> {{ pr().label }}
+      </span>
+    </div>
+
+    <div class="ca-row ca-g8" style="margin-bottom: 16px">
+      <span class="p-dot" [style.background]="st().color" [style.box-shadow]="'0 0 0 4px ' + st().color + '33'" style="width: 9px; height: 9px"></span>
+      <span style="font-size: 1.18rem; font-weight: 800; letter-spacing: -0.01em; color: #fff">{{ st().long }}</span>
+    </div>
+
+    <div class="ca-row ca-g10">
+      @if (assignedToName(); as name) {
+        <span class="ca-avatar">{{ initials(name) }}</span>
+      } @else {
+        <span class="ca-avatar" style="background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6)">?</span>
+      }
+      <div style="line-height: 1.25">
+        <p style="font-size: 0.64rem; color: rgba(255, 255, 255, 0.55); letter-spacing: 0.06em; text-transform: uppercase">Asignado a</p>
+        <p style="font-size: 0.88rem; font-weight: 700" [style.color]="assignedToName() ? '#fff' : 'rgba(255,255,255,.6)'">
+          {{ assignedToName() ?? 'Sin asignar' }}
+        </p>
+      </div>
+    </div>
+
+    @if (estimatedHours() && isOpen()) {
+      <div style="margin-top: 18px">
+        <div class="ca-row ca-between" style="margin-bottom: 7px">
+          <span class="ca-row ca-g6" style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.7)">
+            <svg lucideTimer [size]="12"></svg>
+            Tiempo de atención · {{ formatHours(elapsedHours()) }} de {{ estimatedHours() }} h
+          </span>
+          <span style="font-size: 0.7rem; font-weight: 700" [style.color]="slaColor()">{{ slaText() }}</span>
+        </div>
+        <div style="height: 5px; border-radius: 99px; background: rgba(255, 255, 255, 0.14); overflow: hidden">
+          <div
+            style="height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1)"
+            [style.width.%]="(ratio() > 1 ? 1 : ratio()) * 100"
+            [style.background]="slaColor()"
+          ></div>
+        </div>
+      </div>
     }
   </div>
 
-  <div class="body">
-    @if (tab() === 'update' || hasEscalation()) {
-      <form (ngSubmit)="saveUpdate()">
-        <p class="eyebrow">Estado</p>
-        <div class="options">
-          @for (s of statuses; track s.value) {
-            <button
-              type="button"
-              class="option"
-              [class.selected]="status() === s.value"
-              [style.--tone]="s.color"
-              (click)="status.set(s.value)"
-            >
-              <span class="dot"></span>{{ s.label }}
-              @if (status() === s.value) {
-                <i class="pi pi-check-circle"></i>
-              }
-            </button>
+  <!-- ═════ Selector segmentado ═════ -->
+  <div style="padding: 14px 14px 0">
+    <div class="ca-seg" role="tablist">
+      <span class="ca-seg-ind" [style.transform]="'translateX(' + tabIndex() * 100 + '%)'"></span>
+      @for (t of tabs; track t.id) {
+        <button type="button" role="tab" class="ca-seg-btn" [attr.aria-selected]="tab() === t.id" [attr.data-on]="tab() === t.id" (click)="selectTab(t.id)">
+          @switch (t.id) {
+            @case ('update') { <svg lucideMessageSquare [size]="14"></svg> }
+            @case ('assign') { <svg lucideUserCog [size]="14"></svg> }
+            @case ('escalate') { <svg lucideLink2 [size]="14"></svg> }
+            @case ('close') { <svg lucideLock [size]="14"></svg> }
           }
+          {{ t.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div style="padding: 16px">
+    <!-- ═════ Gestión ═════ -->
+    @if (tab() === 'update') {
+      <form class="ca-form fade-in" (ngSubmit)="saveUpdate()">
+        <div>
+          <p class="cd-cap" style="margin-bottom: 12px">Mover a</p>
+          @if (statusIdx() < 0) {
+            <p style="font-size: 0.74rem; color: var(--text-3); margin-bottom: 12px">
+              El caso está en «{{ st().long }}». Elige un estado para moverlo.
+            </p>
+          }
+          <div class="ca-steps">
+            <span class="ca-steps-line"></span>
+            <span class="ca-steps-fill" [style.width.%]="stepsFill()"></span>
+            @for (s of statuses; track s.value; let i = $index) {
+              <button type="button" class="ca-step" [attr.data-on]="status() === s.value" [attr.aria-pressed]="status() === s.value" (click)="status.set(s.value)">
+                <span
+                  class="ca-step-dot"
+                  [style.background]="i <= statusIdx() ? s.color : '#fff'"
+                  [style.border-color]="i <= statusIdx() ? s.color : 'var(--border-hi)'"
+                  [style.box-shadow]="status() === s.value ? '0 0 0 5px ' + s.color + '26' : 'none'"
+                >
+                  @if (status() === s.value) {
+                    <svg lucideCircleCheckBig [size]="11" [strokeWidth]="3" color="#fff"></svg>
+                  }
+                </span>
+                <span [style.color]="status() === s.value ? s.color : 'var(--text-3)'" [style.font-weight]="status() === s.value ? 800 : 600">{{ s.label }}</span>
+              </button>
+            }
+          </div>
         </div>
 
-        <p class="eyebrow label">Comentario <span class="req">*</span></p>
-        <textarea
-          pTextarea
-          rows="3"
-          class="field-full"
-          name="message"
-          [ngModel]="message()"
-          (ngModelChange)="message.set($event)"
-          placeholder="Describe la acción realizada..."
-        ></textarea>
+        <div>
+          <div class="ca-row ca-between" style="margin-bottom: 8px">
+            <p class="cd-cap">Nota de seguimiento <span style="color: var(--red)">*</span></p>
+            <span class="ca-row ca-g6" style="font-size: 0.66rem; color: var(--text-3)">
+              <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
+                <circle cx="10" cy="10" r="8" fill="none" stroke="var(--surface-3)" stroke-width="2.5" />
+                <circle
+                  cx="10" cy="10" r="8" fill="none" stroke-width="2.5" stroke-linecap="round"
+                  [attr.stroke]="pct() > 0.9 ? 'var(--red)' : '#002B7A'"
+                  [attr.stroke-dasharray]="pct() * 50.27 + ' 50.27'"
+                  transform="rotate(-90 10 10)"
+                  style="transition: stroke-dasharray 0.2s"
+                />
+              </svg>
+              {{ message().length }}/{{ maxComment }}
+            </span>
+          </div>
 
-        @if (feedback(); as f) {
-          <div class="alert" [class.ok]="f.ok" [class.error]="!f.ok">{{ f.msg }}</div>
-        }
-        <p-button type="submit" label="Guardar" styleClass="cta field-full" [loading]="loading()" />
-      </form>
-    } @else {
-      <form (ngSubmit)="saveEscalation()">
-        <p class="eyebrow">Proveedor <span class="req">*</span></p>
-        <div class="options">
-          @for (p of providers(); track p.id) {
-            <button
-              type="button"
-              class="option provider"
-              [class.selected]="providerId() === p.id"
-              [style.--tone]="'#F59E0B'"
-              (click)="providerId.set(p.id)"
-            >
-              <i class="pi pi-building"></i>
-              <span class="prov">
-                <strong>{{ p.name }}</strong>
-                <small>{{ p.type }}</small>
-              </span>
-              @if (providerId() === p.id) {
-                <i class="pi pi-check-circle"></i>
+          <div class="ca-composer">
+            <textarea
+              rows="5"
+              name="message"
+              [maxLength]="maxComment"
+              [ngModel]="message()"
+              (ngModelChange)="message.set($event)"
+              placeholder="Describe la acción realizada, el hallazgo o lo que necesitas del usuario…"
+            ></textarea>
+            <div class="ca-quick">
+              <svg lucideSparkles [size]="12" style="color: var(--text-3); flex-shrink: 0"></svg>
+              @for (q of quickNotes; track q) {
+                <button type="button" (click)="addQuickNote(q)">{{ q }}</button>
               }
-            </button>
-          }
+            </div>
+          </div>
         </div>
 
-        <p class="eyebrow label">Notas</p>
-        <textarea
-          pTextarea
-          rows="3"
-          class="field-full"
-          name="notes"
-          [ngModel]="notes()"
-          (ngModelChange)="notes.set($event)"
-          placeholder="Contexto para el proveedor..."
-        ></textarea>
-
         @if (feedback(); as f) {
-          <div class="alert" [class.ok]="f.ok" [class.error]="!f.ok">{{ f.msg }}</div>
+          <div class="ca-note fade-in" [style.background]="f.ok ? 'var(--green-dim)' : 'var(--red-dim)'" [style.color]="f.ok ? 'var(--green)' : 'var(--red)'">
+            @if (f.ok) { <svg lucideCircleCheckBig [size]="13"></svg> } @else { <svg lucideTriangleAlert [size]="13"></svg> }
+            {{ f.msg }}
+          </div>
         }
-        <p-button type="submit" label="Escalar caso" icon="pi pi-link" severity="warn" styleClass="field-full" [loading]="loading()" />
+
+        <button type="submit" class="btn btn-cyan ca-cta" [disabled]="loading() || !message().trim()">
+          @if (loading()) {
+            <span class="p-dot pulse" style="background: #fff"></span> Guardando…
+          } @else {
+            <svg lucideSend [size]="14"></svg> Guardar actualización
+          }
+        </button>
       </form>
+    }
+
+    <!-- ═════ Asignar (solo forma, como en el original) ═════ -->
+    @if (tab() === 'assign') {
+      <div class="ca-form fade-in">
+        <div class="ca-note" style="background: var(--blue-dim); color: #002b7a">
+          <svg lucideLock [size]="12"></svg> La reasignación se conecta en el siguiente paso.
+        </div>
+        <div class="ca-current">
+          <span class="ca-avatar" [style.background]="assignedToName() ? 'var(--blue-dim2)' : 'var(--surface-2)'" [style.color]="assignedToName() ? '#002B7A' : 'var(--text-3)'">
+            {{ assignedToName() ? initials(assignedToName()) : '?' }}
+          </span>
+          <div style="line-height: 1.25">
+            <p class="cd-cap">Responsable actual</p>
+            <p style="font-size: 0.88rem; font-weight: 700" [style.color]="assignedToName() ? 'var(--text-1)' : 'var(--text-3)'">{{ assignedToName() ?? 'Sin asignar' }}</p>
+          </div>
+        </div>
+        <div>
+          <p class="cd-cap" style="margin-bottom: 7px">Nuevo responsable</p>
+          <select disabled class="field" style="font-size: 0.88rem"><option>Selecciona un analista</option></select>
+        </div>
+        <div>
+          <p class="cd-cap" style="margin-bottom: 7px">Motivo del cambio</p>
+          <textarea rows="3" disabled class="field" style="font-size: 0.88rem" placeholder="¿Por qué se reasigna el caso?"></textarea>
+        </div>
+        <button type="button" disabled class="btn btn-cyan ca-cta"><svg lucideUserCog [size]="14"></svg> Asignar caso</button>
+      </div>
+    }
+
+    <!-- ═════ Escalar ═════ -->
+    @if (tab() === 'escalate') {
+      @if (hasEscalation()) {
+        <div class="ca-done fade-in"><svg lucideLink2 [size]="16"></svg> Este caso ya fue escalado a un proveedor.</div>
+      } @else {
+        <form class="ca-form fade-in" (ngSubmit)="saveEscalation()">
+          <div>
+            <p class="cd-cap" style="margin-bottom: 9px">Proveedor <span style="color: var(--red)">*</span></p>
+            <div class="ca-search">
+              <svg lucideSearch [size]="13"></svg>
+              <input name="providerQuery" [ngModel]="providerQuery()" (ngModelChange)="providerQuery.set($event)" placeholder="Buscar proveedor…" />
+            </div>
+            <div class="ca-provs">
+              @for (p of filteredProviders(); track p.id) {
+                <button type="button" class="ca-prov" [attr.data-on]="providerId() === p.id" (click)="providerId.set(p.id)">
+                  <span class="ca-prov-av">{{ initials(p.name) }}</span>
+                  <span style="flex: 1; min-width: 0; text-align: left">
+                    <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; font-weight: 700; color: var(--text-1)">{{ p.name }}</span>
+                    <span style="display: block; font-size: 0.66rem; color: var(--text-3)">{{ p.type }}</span>
+                  </span>
+                  <span class="ca-radio" [attr.data-on]="providerId() === p.id">
+                    @if (providerId() === p.id) {
+                      <svg lucideCircleCheckBig [size]="14" [strokeWidth]="3" color="#fff"></svg>
+                    }
+                  </span>
+                </button>
+              }
+              @if (filteredProviders().length === 0) {
+                <p style="font-size: 0.78rem; color: var(--text-3); padding: 10px 4px">Sin resultados.</p>
+              }
+            </div>
+          </div>
+
+          <div>
+            <p class="cd-cap" style="margin-bottom: 7px">Notas</p>
+            <textarea rows="4" name="notes" class="field" style="font-size: 0.88rem" [ngModel]="notes()" (ngModelChange)="notes.set($event)" placeholder="Contexto para el proveedor…"></textarea>
+          </div>
+
+          @if (feedback(); as f) {
+            <div class="ca-note fade-in" [style.background]="f.ok ? 'var(--green-dim)' : 'var(--red-dim)'" [style.color]="f.ok ? 'var(--green)' : 'var(--red)'">
+              @if (f.ok) { <svg lucideCircleCheckBig [size]="13"></svg> } @else { <svg lucideTriangleAlert [size]="13"></svg> }
+              {{ f.msg }}
+            </div>
+          }
+
+          <button type="submit" class="btn ca-cta" style="background: #f59e0b; color: #fff; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3)" [disabled]="loading() || !providerId()">
+            @if (loading()) {
+              <span class="p-dot pulse" style="background: #fff"></span> Escalando…
+            } @else {
+              <svg lucideLink2 [size]="14"></svg> Escalar caso
+            }
+          </button>
+        </form>
+      }
+    }
+
+    <!-- ═════ Cerrar (solo forma, como en el original) ═════ -->
+    @if (tab() === 'close') {
+      <div class="ca-form fade-in">
+        <div class="ca-note" style="background: var(--blue-dim); color: #002b7a">
+          <svg lucideLock [size]="12"></svg> La documentación de cierre se conecta en el siguiente paso.
+        </div>
+        <div>
+          <p class="cd-cap" style="margin-bottom: 7px">Resumen de la solución</p>
+          <textarea rows="3" disabled class="field" style="font-size: 0.88rem" placeholder="¿Qué se hizo para resolver el caso?"></textarea>
+        </div>
+        <div>
+          <p class="cd-cap" style="margin-bottom: 7px">Causa raíz</p>
+          <textarea rows="2" disabled class="field" style="font-size: 0.88rem" placeholder="¿Qué originó el problema?"></textarea>
+        </div>
+        <div>
+          <p class="cd-cap" style="margin-bottom: 7px">Confirmación del usuario</p>
+          <select disabled class="field" style="font-size: 0.88rem"><option>Selecciona una opción</option></select>
+        </div>
+        <button type="button" disabled class="btn btn-cyan ca-cta"><svg lucideLock [size]="14"></svg> Cerrar caso</button>
+      </div>
     }
   </div>
 </div>

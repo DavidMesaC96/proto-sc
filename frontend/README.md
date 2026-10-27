@@ -1,6 +1,10 @@
 # Mesa de Servicios — Frontend (Angular)
 
-Angular 22 (standalone, signals, sin zone.js) + PrimeNG 22. Consume la API de `../backend`.
+Angular 22 (standalone, signals, sin zone.js) + íconos Lucide. Consume la API de `../backend`.
+
+El aspecto es el del Next.js original: `src/styles.css` es el `globals.css` de la rama `feature/fix`
+(tokens, botones, campos y las clases `cd-*` / `ca-*` del rediseño del detalle) y no depende de una
+librería de componentes.
 
 ## Estructura
 
@@ -8,7 +12,7 @@ Angular 22 (standalone, signals, sin zone.js) + PrimeNG 22. Consume la API de `.
 src/app/
 ├── core/       Sesión (AuthService), interceptor Bearer, guards, servicios de API y modelos
 ├── shared/     Componentes reutilizables (badges de estado y prioridad)
-├── layout/     Shell: menú lateral + barra superior
+├── layout/     Shell (menú lateral) y PageHeader (título, búsqueda, menú de usuario)
 └── features/
     ├── login/
     └── cases/  Lista con filtros, detalle con historial, acciones y nuevo ticket
@@ -40,4 +44,6 @@ npm run build
 
 ## Pendiente de migrar desde Next.js
 
-Dashboard, incidentes, catálogo, reportes, usuarios y configuración.
+Dashboard, incidentes, catálogo, reportes, usuarios, health y ajustes. En el menú aparecen
+atenuados con "Próximamente". Dentro del detalle, las pestañas Asignar y Cerrar del panel de gestión
+son solo la forma, igual que en el original.

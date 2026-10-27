@@ -1,0 +1,61 @@
+<div class="ph">
+  <div class="ph-title">
+    <h1>{{ title() }}</h1>
+    @if (subtitle()) {
+      <p>{{ subtitle() }}</p>
+    }
+  </div>
+
+  <div class="ph-actions">
+    <button type="button" class="topbar-search search" (click)="goToCases()">
+      <svg lucideSearch [size]="15"></svg>
+      <span>Buscar...</span>
+      <kbd>⌘K</kbd>
+    </button>
+
+    <div class="bell" title="Notificaciones próximamente">
+      <svg lucideBell [size]="17" [strokeWidth]="2"></svg>
+    </div>
+
+    <div class="menu-wrap">
+      <button type="button" class="topbar-user user" (click)="menuOpen.set(!menuOpen())" [attr.aria-expanded]="menuOpen()" aria-haspopup="menu">
+        <span class="av-wrap">
+          <span class="av">{{ initials() }}</span>
+          <span class="online"></span>
+        </span>
+        <span class="uname">{{ firstName() }}</span>
+        <svg lucideChevronDown [size]="13" class="chev" [class.open]="menuOpen()"></svg>
+      </button>
+
+      @if (menuOpen()) {
+        <div class="backdrop" (click)="menuOpen.set(false)" aria-hidden="true"></div>
+        <div class="menu fade-in" role="menu">
+          <div class="menu-head">
+            <span class="av big">{{ initials() }}</span>
+            <div>
+              <p class="m-name">{{ user()?.name }}</p>
+              <p class="m-role">{{ roleLabel() }}</p>
+            </div>
+          </div>
+          <div class="menu-body">
+            <span class="menu-item soon" role="menuitem" aria-disabled="true" title="Próximamente">
+              <svg lucideSettings [size]="16"></svg> Ajustes
+            </span>
+          </div>
+          <div class="menu-body top">
+            <button type="button" class="topbar-menu-item-danger menu-item danger" role="menuitem" (click)="logout()">
+              <svg lucideLogOut [size]="16"></svg> Cerrar sesión
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (showNewTicket()) {
+      <a routerLink="/cases/new" class="topbar-new-btn new">
+        <svg lucidePlus [size]="15" [strokeWidth]="2.5"></svg>
+        Nuevo ticket
+      </a>
+    }
+  </div>
+</div>

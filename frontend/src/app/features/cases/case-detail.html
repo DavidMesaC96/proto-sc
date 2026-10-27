@@ -1,141 +1,184 @@
-<nav class="crumbs" aria-label="Ruta">
-  <a routerLink="/cases">Tickets</a>
-  <i class="pi pi-angle-right"></i>
-  <span>Detalle</span>
-</nav>
-
 @if (loading()) {
-  <div class="card state"><i class="pi pi-spin pi-spinner"></i> Cargando ticket...</div>
+  <app-page-header title="Ticket" subtitle="Dashboard › Tickets › detalle" [showNewTicket]="false" />
+  <div class="cd-card"><p class="hint">Cargando ticket…</p></div>
 } @else if (error()) {
-  <div class="card state">
-    <div class="alert error"><i class="pi pi-exclamation-triangle"></i>{{ error() }}</div>
-    <a routerLink="/cases" class="back">← Volver a tickets</a>
+  <app-page-header title="Ticket" subtitle="Dashboard › Tickets › detalle" [showNewTicket]="false" />
+  <div class="cd-card">
+    <div class="ca-note" style="background: var(--red-dim); color: var(--red)">{{ error() }}</div>
+    <a routerLink="/cases" class="bc-link" style="display: inline-block; margin-top: 14px">← Volver a tickets</a>
   </div>
 } @else if (detail(); as c) {
-  <div class="layout">
-    <!-- Izquierda: metadatos -->
-    <div class="col">
-      <section class="card box">
-        <p class="eyebrow">Detalles</p>
-        <div class="badges">
-          <app-status-badge [status]="c.status" />
-          <app-priority-badge [priority]="c.priority" />
-        </div>
-        @if (category(); as cat) {
-          <p class="hint cat"><i class="pi" [class]="cat.icon"></i> {{ cat.label }}</p>
-        }
-        <div class="idbox">
-          <p class="hint">ID DEL TICKET</p>
-          <code>{{ c.id }}</code>
-        </div>
+  <div class="fade-up">
+    <app-page-header [title]="c.title" subtitle="Dashboard › Tickets › detalle" [showNewTicket]="false" />
 
-        <div class="sep">
-          <p class="hint"><i class="pi pi-clock"></i> CREADO</p>
-          <p class="value">{{ c.createdAt | date: "dd 'de' MMMM 'de' y" }}</p>
-        </div>
-        @if (c.estimatedTime) {
-          <div class="sep">
-            <p class="hint">TIEMPO EST.</p>
-            <p class="value strong">{{ c.estimatedTime }}h</p>
+    <div class="cd-grid">
+      <!-- ═════ Izquierda: metadatos y personas ═════ -->
+      <div class="cd-col">
+        <div class="cd-card">
+          <p class="cd-cap">Detalles</p>
+          <div class="cd-wrap" style="margin-top: 14px">
+            <app-status-badge [status]="c.status" />
+            <app-priority-badge [priority]="c.priority" />
+            <span class="cd-chip">
+              @switch (c.category) {
+                @case ('INCIDENT') { <svg lucideZap [size]="12"></svg> }
+                @case ('REQUEST') { <svg lucideFileText [size]="12"></svg> }
+                @case ('CHANGE') { <svg lucideRefreshCw [size]="12"></svg> }
+              }
+              {{ categoryLabel() }}
+            </span>
           </div>
-        }
-      </section>
 
-      <section class="card box">
-        <p class="eyebrow">Solicitante</p>
-        @if (c.requester; as r) {
-          <div class="person">
-            <div class="avatar lg" style="background: var(--green-dim); color: #059669">{{ initials(r.name) }}</div>
-            <div>
-              <p class="name">{{ r.name }}</p>
-              <p class="hint">{{ r.email }}</p>
+          <div class="cd-tiles">
+            <div class="cd-tile">
+              <p class="cd-cap cd-row" style="gap: 5px"><svg lucideCalendarDays [size]="11"></svg> Creado</p>
+              <p>{{ c.createdAt | date: 'dd MMM y' }}</p>
+            </div>
+            <div class="cd-tile">
+              <p class="cd-cap cd-row" style="gap: 5px"><svg lucideClock [size]="11"></svg> Estimado</p>
+              <p style="color: var(--green)">{{ c.estimatedTime ? c.estimatedTime + ' h' : '—' }}</p>
             </div>
           </div>
-          @if (r.department) {
-            <p class="hint line"><i class="pi pi-building"></i> {{ r.department }}</p>
-          }
-          @if (r.phone) {
-            <p class="hint line">{{ r.phone }}</p>
-          }
-        }
-      </section>
 
-      <section class="card box">
-        <p class="eyebrow">Asignado a</p>
-        @if (c.assignedTo; as a) {
-          <div class="person">
-            <div class="avatar" style="background: rgba(16,185,129,.1); color: #10b981">{{ initials(a.name) }}</div>
-            <p class="name">{{ a.name }}</p>
+          <div class="cd-id">
+            <span class="cd-cap">ID del ticket</span>
+            <code>{{ c.id }}</code>
           </div>
-        } @else {
-          <p class="hint">Sin asignar</p>
+        </div>
+
+        <div class="cd-card">
+          <p class="cd-cap">Solicitante</p>
+          @if (c.requester; as r) {
+            <div class="cd-person">
+              <span class="cd-av" style="background: var(--sky-dim); color: var(--sky)">{{ initials(r.name) }}</span>
+              <div style="min-width: 0">
+                <p class="cd-name">{{ r.name }}</p>
+                <p class="cd-sub">{{ r.email }}</p>
+              </div>
+            </div>
+            <div style="margin-top: 6px">
+              @if (r.department) {
+                <div class="cd-info"><svg lucideBuilding [size]="14"></svg> {{ r.department }}</div>
+              }
+              @if (r.phone) {
+                <div class="cd-info"><svg lucidePhone [size]="14"></svg> {{ r.phone }}</div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="cd-card">
+          <p class="cd-cap">Asignado a</p>
+          @if (c.assignedTo; as a) {
+            <div class="cd-person">
+              <span class="cd-av" style="background: var(--green-dim); color: var(--green)">{{ initials(a.name) }}</span>
+              <div style="min-width: 0">
+                <p class="cd-name">{{ a.name }}</p>
+                <p class="cd-sub">{{ a.email }}</p>
+              </div>
+            </div>
+          } @else {
+            <div class="cd-person">
+              <span class="cd-av" style="background: var(--surface-2); color: var(--text-3)">?</span>
+              <p class="cd-name" style="color: var(--text-3); font-weight: 600">Sin asignar</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ═════ Centro: descripción, escalamiento, actividad ═════ -->
+      <div class="cd-col">
+        <div class="cd-card cd-hero">
+          <div class="cd-hero-bar"></div>
+          <div class="cd-hero-body">
+            <p class="cd-cap">Descripción del caso</p>
+            <h1 class="cd-title">{{ c.title }}</h1>
+            <p class="cd-desc">{{ c.description }}</p>
+          </div>
+        </div>
+
+        @if (c.escalation; as e) {
+          <div class="cd-esc fade-in">
+            <div class="cd-row" style="gap: 14px">
+              <span class="cd-esc-ico"><svg lucideLink2 [size]="18"></svg></span>
+              <div>
+                <p style="font-size: 0.95rem; font-weight: 800; color: #b45309">Escalado a proveedor</p>
+                <p style="font-size: 0.76rem; color: var(--text-3)">{{ e.provider?.name }} · {{ e.provider?.type }}</p>
+              </div>
+            </div>
+
+            <div class="cd-esc-grid">
+              <div><p class="cd-cap">Proveedor</p><p>{{ e.provider?.name }}</p></div>
+              <div><p class="cd-cap">Tipo</p><p>{{ e.provider?.type }}</p></div>
+              <div><p class="cd-cap">Enviado</p><p>{{ e.sentAt | date: 'dd MMM y' }}</p></div>
+              <div><p class="cd-cap">Estado</p><p>{{ escalationLabel[e.status] }}</p></div>
+            </div>
+
+            @if (e.notes) {
+              <p class="cd-quote">{{ e.notes }}</p>
+            }
+          </div>
         }
-      </section>
-    </div>
 
-    <!-- Centro: descripción, escalamiento y actividad -->
-    <div class="col">
-      <section class="card box big">
-        <h1>{{ c.title }}</h1>
-        <p class="description">{{ c.description }}</p>
-      </section>
+        <div class="cd-card" style="padding: 28px">
+          <div class="cd-row" style="justify-content: space-between">
+            <p class="cd-cap">Actividad</p>
+            <span class="cd-chip">
+              <svg lucideMessageSquare [size]="12"></svg>
+              {{ c.updates.length }} entrada{{ c.updates.length === 1 ? '' : 's' }}
+            </span>
+          </div>
 
-      @if (c.escalation; as e) {
-        <section class="card box escalation">
-          <p class="esc-title"><i class="pi pi-link"></i> Escalado a proveedor</p>
-          <dl>
-            <div><dt>Proveedor</dt><dd>{{ e.provider?.name }}</dd></div>
-            <div><dt>Tipo</dt><dd>{{ e.provider?.type }}</dd></div>
-            <div><dt>Enviado</dt><dd>{{ e.sentAt | date: 'dd/MM/y' }}</dd></div>
-            <div><dt>Estado</dt><dd>{{ e.status === 'PENDING' ? 'Pendiente' : 'Resuelto' }}</dd></div>
-          </dl>
-          @if (e.notes) {
-            <p class="esc-notes">{{ e.notes }}</p>
-          }
-        </section>
-      }
-
-      <section class="card box big">
-        <p class="eyebrow">
-          Actividad · {{ c.updates.length }} entrada{{ c.updates.length === 1 ? '' : 's' }}
-        </p>
-        <ol class="feed">
-          @for (u of c.updates; track u.id; let last = $last) {
-            <li>
-              <div class="rail">
-                <div class="avatar" [style.background]="tone(u.author?.role).bg" [style.color]="tone(u.author?.role).color">
-                  {{ initials(u.author?.name) }}
+          @if (c.updates.length === 0) {
+            <div class="cd-empty">Todavía no hay actividad registrada en este caso.</div>
+          } @else {
+            <div class="cd-tl">
+              @for (u of c.updates; track u.id; let i = $index) {
+                <div class="cd-tl-item slide-r" [class]="'d' + (i + 1 > 6 ? 6 : i + 1)">
+                  <span class="cd-tl-av" [style.background]="tone(u.author?.role).bg" [style.color]="tone(u.author?.role).color">
+                    {{ initials(u.author?.name) }}
+                  </span>
+                  <div class="cd-tl-main">
+                    <div class="cd-tl-head">
+                      <span style="font-size: 0.92rem; font-weight: 700; color: var(--text-1)">{{ u.author?.name }}</span>
+                      <span class="cd-role" [style.background]="tone(u.author?.role).bg" [style.color]="tone(u.author?.role).color">
+                        {{ roleLabel(u.author?.role) }}
+                      </span>
+                      <span class="cd-time">{{ u.createdAt | date: 'dd MMM, hh:mm a' }}</span>
+                    </div>
+                    @if (u.newStatus && u.oldStatus !== u.newStatus && (u.oldStatus || i === 0)) {
+                      <div class="cd-move">
+                        @if (u.oldStatus) {
+                          <app-status-badge [status]="u.oldStatus" />
+                          <svg lucideArrowRight [size]="13" style="color: var(--text-3)"></svg>
+                        }
+                        <app-status-badge [status]="u.newStatus" />
+                      </div>
+                    }
+                    <p class="cd-bubble">{{ u.message }}</p>
+                  </div>
                 </div>
-                @if (!last) {
-                  <span class="line-v"></span>
-                }
-              </div>
-              <div class="entry">
-                <div class="entry-head">
-                  <strong>{{ u.author?.name }}</strong>
-                  @if (u.newStatus && u.oldStatus !== u.newStatus) {
-                    <app-status-badge [status]="u.newStatus" />
-                  }
-                  <span class="hint when">{{ u.createdAt | date: 'dd MMM, HH:mm' }}</span>
-                </div>
-                <p class="msg">{{ u.message }}</p>
-              </div>
-            </li>
+              }
+            </div>
           }
-        </ol>
-      </section>
-    </div>
+        </div>
+      </div>
 
-    <!-- Derecha: acciones (solo personal de la mesa) -->
-    <div class="col">
-      @if (isStaff()) {
-        <app-case-actions
-          [caseId]="c.id"
-          [currentStatus]="c.status"
-          [hasEscalation]="!!c.escalation"
-          (changed)="reload()"
-        />
-      }
+      <!-- ═════ Derecha: gestión (solo personal de la mesa) ═════ -->
+      <div>
+        @if (isStaff()) {
+          <app-case-actions
+            [caseId]="c.id"
+            [currentStatus]="c.status"
+            [priority]="c.priority"
+            [estimatedHours]="c.estimatedTime"
+            [elapsedHours]="elapsedHours()"
+            [assignedToName]="c.assignedTo?.name ?? null"
+            [hasEscalation]="!!c.escalation"
+            (changed)="reload()"
+          />
+        }
+      </div>
     </div>
   </div>
 }
