@@ -1,0 +1,57 @@
+.wrap { max-width: 42rem; margin: 0 auto; }
+
+.crumbs { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 0.82rem; color: var(--text-3); }
+.crumbs a { text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+.crumbs span { color: var(--blue); font-weight: 700; }
+.crumbs .pi { font-size: 0.7rem; }
+
+.card { overflow: hidden; }
+.band { padding: 20px 28px; background: var(--surface-1); }
+.band.top { border-bottom: 1px solid var(--border); }
+.band.bottom { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--border); }
+h1 { font-size: 1.25rem; font-weight: 900; color: var(--blue); letter-spacing: -0.02em; margin-bottom: 4px; }
+
+.fields { display: flex; flex-direction: column; gap: 24px; padding: 24px 28px; }
+.req { color: var(--red); }
+.row-between { display: flex; justify-content: space-between; margin-top: 4px; }
+
+fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px;
+  border: 1.5px solid var(--border-md);
+  border-radius: 14px;
+  background: var(--canvas);
+  box-shadow: var(--shadow-sm);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.choice .pi { margin-bottom: 8px; font-size: 1.1rem; color: var(--text-3); }
+.choice strong { font-size: 0.88rem; }
+.choice small { font-size: 0.7rem; color: var(--text-3); }
+.choice.active { border-color: var(--green); background: rgba(0, 200, 83, 0.08); }
+.choice.active .pi { color: var(--green); }
+.choice.active strong { color: #007a3d; }
+
+.prio { flex-direction: row; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; }
+.prio span:last-child { display: flex; flex-direction: column; }
+.prio .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); }
+.prio.active { border-color: var(--tone); background: color-mix(in srgb, var(--tone) 8%, transparent); }
+.prio.active .dot { background: var(--tone); }
+.prio.active strong { color: var(--tone); }
+
+.cancel { padding: 8px 14px; border-radius: var(--r-sm); color: var(--text-3); font-weight: 600; text-decoration: none; }
+.cancel:hover { background: var(--surface-2); }
+
+@media (max-width: 560px) {
+  .grid3, .grid2 { grid-template-columns: 1fr; }
+}

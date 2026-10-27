@@ -1,0 +1,90 @@
+<div class="page">
+  <section class="hero">
+    <div class="hero-logo">
+      <img src="logo-sistecredito.png" alt="Sistecrédito" />
+      <p>IT SERVICE MANAGEMENT</p>
+    </div>
+
+    <div>
+      <p class="kicker">Mesa de Servicios</p>
+      <h1>Gestión de servicios<br /><span>con control total.</span></h1>
+      <p class="lead">
+        Cada solicitud, incidente y cambio en un solo lugar. Visibilidad completa para el equipo,
+        respuestas concretas para el usuario.
+      </p>
+
+      <ul class="highlights">
+        @for (h of highlights; track h.text) {
+          <li>
+            <span class="icon" [style.color]="h.color" [style.background]="h.color + '18'" [style.border-color]="h.color + '35'">
+              <i class="pi" [class]="h.icon"></i>
+            </span>
+            <div>
+              <strong>{{ h.text }}</strong>
+              <small>{{ h.sub }}</small>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="panel">
+    <form class="box" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2>Bienvenido</h2>
+      <p class="hint sub">Ingresa con tu cuenta corporativa</p>
+
+      <label class="field-label" for="email">Correo electrónico</label>
+      <input
+        pInputText
+        id="email"
+        type="email"
+        formControlName="email"
+        autocomplete="username"
+        placeholder="correo@sistecredito.com"
+        class="field-full"
+        [class.ng-invalid]="form.controls.email.touched && form.controls.email.invalid"
+      />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <p class="field-error">Ingresa un correo válido</p>
+      }
+
+      <label class="field-label spaced" for="password">Contraseña</label>
+      <div class="password">
+        <input
+          pInputText
+          id="password"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          class="field-full"
+          [class.ng-invalid]="form.controls.password.touched && form.controls.password.invalid"
+        />
+        <button
+          type="button"
+          class="toggle"
+          (click)="showPassword.set(!showPassword())"
+          [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+        >
+          <i class="pi" [class.pi-eye]="!showPassword()" [class.pi-eye-slash]="showPassword()"></i>
+        </button>
+      </div>
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <p class="field-error">La contraseña es requerida</p>
+      }
+
+      @if (error()) {
+        <div class="alert error" role="alert"><i class="pi pi-exclamation-triangle"></i>{{ error() }}</div>
+      }
+
+      <p-button
+        type="submit"
+        styleClass="cta field-full"
+        [label]="loading() ? 'Verificando...' : 'Ingresar'"
+        icon="pi pi-sign-in"
+        [loading]="loading()"
+      />
+    </form>
+  </section>
+</div>

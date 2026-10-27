@@ -1,0 +1,47 @@
+.page { display: flex; min-height: 100vh; background: var(--canvas); }
+
+.hero {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 42%;
+  padding: 48px 56px;
+  background: linear-gradient(160deg, #002b7a 0%, #003da3 60%, #001f5c 100%);
+  color: #fff;
+}
+
+.hero-logo img { height: 36px; width: auto; filter: brightness(0) invert(1); display: block; }
+.hero-logo p { margin-top: 6px; font-size: 0.62rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.45); }
+
+.kicker { margin-bottom: 18px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); }
+
+h1 { margin-bottom: 18px; font-size: clamp(1.6rem, 2.2vw, 2.6rem); font-weight: 900; line-height: 1.12; letter-spacing: -0.02em; }
+h1 span { color: var(--green); }
+
+.lead { max-width: 340px; line-height: 1.7; color: rgba(255, 255, 255, 0.65); }
+
+.highlights { display: flex; flex-direction: column; gap: 12px; margin: 36px 0 0; padding: 0; list-style: none; }
+.highlights li { display: flex; align-items: center; gap: 14px; }
+.highlights strong { display: block; font-size: 0.92rem; }
+.highlights small { color: rgba(255, 255, 255, 0.5); font-size: 0.78rem; }
+
+.icon { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid; border-radius: 12px; }
+
+.panel { display: flex; flex: 1; align-items: center; justify-content: center; padding: 32px 20px; background: var(--surface-1); }
+
+.box { width: 100%; max-width: 400px; padding: 36px; background: var(--canvas); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-md); }
+
+h2 { font-size: 1.5rem; font-weight: 900; color: var(--blue); letter-spacing: -0.02em; }
+.sub { margin: 4px 0 24px; }
+.spaced { margin-top: 16px; }
+
+.password { position: relative; }
+.password input { padding-right: 44px; }
+.toggle { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); border: 0; background: none; color: var(--text-3); cursor: pointer; padding: 6px; }
+
+.alert { margin: 16px 0; }
+:host ::ng-deep .field-full { width: 100%; }
+
+@media (min-width: 1024px) {
+  .hero { display: flex; }
+}

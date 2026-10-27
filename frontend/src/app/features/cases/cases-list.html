@@ -1,0 +1,129 @@
+<header class="head">
+  <div>
+    <h1>Tickets</h1>
+    <p class="hint">
+      {{ filtered().length }} resultado{{ filtered().length === 1 ? '' : 's' }}
+    </p>
+  </div>
+  <p-button label="Nuevo ticket" icon="pi pi-plus" styleClass="cta" (onClick)="newCase()" />
+</header>
+
+<div class="filters">
+  <div class="tabs" role="tablist" aria-label="Filtrar por estado">
+    @for (tab of statusTabs; track tab.value) {
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.active]="statusFilter() === tab.value"
+        [attr.aria-selected]="statusFilter() === tab.value"
+        (click)="setFilter('status', tab.value)"
+      >
+        {{ tab.label }}
+        <span class="count">{{ counts()[tab.value] ?? 0 }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="priorities">
+    <i class="pi pi-filter hint"></i>
+    @for (p of priorityFilters; track p.value) {
+      <button
+        type="button"
+        class="chip"
+        [class.active]="priorityFilter() === p.value"
+        [style.--chip]="p.color || 'var(--text-1)'"
+        (click)="setFilter('priority', p.value)"
+      >
+        @if (p.color) {
+          <span class="dot" [style.background]="p.color"></span>
+        }
+        {{ p.label }}
+      </button>
+    }
+  </div>
+</div>
+
+<div class="card table-card">
+  <div class="search">
+    <i class="pi pi-search"></i>
+    <input
+      pInputText
+      type="search"
+      placeholder="Buscar por título o solicitante..."
+      [value]="search()"
+      (input)="search.set($any($event.target).value)"
+      aria-label="Buscar tickets"
+    />
+  </div>
+
+  @if (error()) {
+    <div class="alert error state"><i class="pi pi-exclamation-triangle"></i>{{ error() }}</div>
+  } @else {
+    <p-table
+      [value]="filtered()"
+      [loading]="loading()"
+      [paginator]="filtered().length > 10"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [rowHover]="true"
+      dataKey="id"
+      [tableStyle]="{ 'min-width': '52rem' }"
+    >
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="title">Título <p-sort-icon field="title" /></th>
+          <th pSortableColumn="status" style="width: 9.5rem">Estado <p-sort-icon field="status" /></th>
+          <th pSortableColumn="priorityRank" style="width: 8rem">Prioridad <p-sort-icon field="priorityRank" /></th>
+          @if (isStaff()) {
+            <th style="width: 12rem">Solicitante</th>
+          }
+          <th pSortableColumn="estimatedTime" style="width: 5rem">Est. <p-sort-icon field="estimatedTime" /></th>
+          <th pSortableColumn="createdAt" style="width: 6.5rem">Creado <p-sort-icon field="createdAt" /></th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-c>
+        <tr class="row" (click)="open(c)">
+          <td>
+            <div class="title-cell">
+              @if (c.priority === 'CRITICAL') {
+                <span class="critical" title="Prioridad crítica"></span>
+              }
+              <a [routerLink]="['/cases', c.id]" class="title" (click)="$event.stopPropagation()">{{ c.title }}</a>
+            </div>
+            <p class="hint meta">
+              @if (c.escalation) {
+                ↗ {{ c.escalation.provider?.name }} ·
+              }
+              {{ c.updatesCount }} nota{{ c.updatesCount === 1 ? '' : 's' }} ·
+              {{ c.assignedTo ? c.assignedTo.name : 'Sin asignar' }}
+            </p>
+          </td>
+          <td><app-status-badge [status]="c.status" /></td>
+          <td><app-priority-badge [priority]="c.priority" /></td>
+          @if (isStaff()) {
+            <td>
+              <p class="requester">{{ c.requester?.name }}</p>
+              <p class="hint meta">{{ c.requester?.department }}</p>
+            </td>
+          }
+          <td class="est">{{ c.estimatedTime ? c.estimatedTime + 'h' : '—' }}</td>
+          <td class="hint">{{ c.createdAt | date: 'dd MMM' }}</td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td [attr.colspan]="isStaff() ? 6 : 5">
+            <div class="empty">
+              <i class="pi pi-inbox"></i>
+              <p><strong>Sin tickets</strong></p>
+              <p class="hint">No hay casos con los filtros actuales.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>

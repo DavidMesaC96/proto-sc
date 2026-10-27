@@ -1,0 +1,92 @@
+<div class="card actions">
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" [class.active]="tab() === 'update'" (click)="selectTab('update')">
+      Actualizar
+    </button>
+    @if (!hasEscalation()) {
+      <button type="button" role="tab" [class.active]="tab() === 'escalate'" (click)="selectTab('escalate')">
+        Escalar
+      </button>
+    }
+  </div>
+
+  <div class="body">
+    @if (tab() === 'update' || hasEscalation()) {
+      <form (ngSubmit)="saveUpdate()">
+        <p class="eyebrow">Estado</p>
+        <div class="options">
+          @for (s of statuses; track s.value) {
+            <button
+              type="button"
+              class="option"
+              [class.selected]="status() === s.value"
+              [style.--tone]="s.color"
+              (click)="status.set(s.value)"
+            >
+              <span class="dot"></span>{{ s.label }}
+              @if (status() === s.value) {
+                <i class="pi pi-check-circle"></i>
+              }
+            </button>
+          }
+        </div>
+
+        <p class="eyebrow label">Comentario <span class="req">*</span></p>
+        <textarea
+          pTextarea
+          rows="3"
+          class="field-full"
+          name="message"
+          [ngModel]="message()"
+          (ngModelChange)="message.set($event)"
+          placeholder="Describe la acción realizada..."
+        ></textarea>
+
+        @if (feedback(); as f) {
+          <div class="alert" [class.ok]="f.ok" [class.error]="!f.ok">{{ f.msg }}</div>
+        }
+        <p-button type="submit" label="Guardar" styleClass="cta field-full" [loading]="loading()" />
+      </form>
+    } @else {
+      <form (ngSubmit)="saveEscalation()">
+        <p class="eyebrow">Proveedor <span class="req">*</span></p>
+        <div class="options">
+          @for (p of providers(); track p.id) {
+            <button
+              type="button"
+              class="option provider"
+              [class.selected]="providerId() === p.id"
+              [style.--tone]="'#F59E0B'"
+              (click)="providerId.set(p.id)"
+            >
+              <i class="pi pi-building"></i>
+              <span class="prov">
+                <strong>{{ p.name }}</strong>
+                <small>{{ p.type }}</small>
+              </span>
+              @if (providerId() === p.id) {
+                <i class="pi pi-check-circle"></i>
+              }
+            </button>
+          }
+        </div>
+
+        <p class="eyebrow label">Notas</p>
+        <textarea
+          pTextarea
+          rows="3"
+          class="field-full"
+          name="notes"
+          [ngModel]="notes()"
+          (ngModelChange)="notes.set($event)"
+          placeholder="Contexto para el proveedor..."
+        ></textarea>
+
+        @if (feedback(); as f) {
+          <div class="alert" [class.ok]="f.ok" [class.error]="!f.ok">{{ f.msg }}</div>
+        }
+        <p-button type="submit" label="Escalar caso" icon="pi pi-link" severity="warn" styleClass="field-full" [loading]="loading()" />
+      </form>
+    }
+  </div>
+</div>
