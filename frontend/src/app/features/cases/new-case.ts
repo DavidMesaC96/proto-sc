@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideChevronRight, LucideFileText, LucideRefreshCw, LucideZap } from '@lucide/angular';
@@ -29,6 +29,11 @@ export class NewCase {
   private readonly casesApi = inject(CasesService);
   private readonly router = inject(Router);
 
+  // Datos que trae el catálogo de servicios: /cases/new?title=...&category=...&priority=...
+  readonly title = input<string>();
+  readonly category = input<string>();
+  readonly priority = input<string>();
+
   protected readonly cats = CATS;
   protected readonly prios = PRIOS;
 
@@ -41,6 +46,19 @@ export class NewCase {
 
   protected readonly loading = signal(false);
   protected readonly error = signal('');
+
+  constructor() {
+    effect(() => {
+      const title = this.title();
+      const category = CATS.find((c) => c.value === this.category())?.value;
+      const priority = PRIOS.find((p) => p.value === this.priority())?.value;
+      this.form.patchValue({
+        ...(title ? { title: title.slice(0, 120) } : {}),
+        ...(category ? { category } : {}),
+        ...(priority ? { priority } : {}),
+      });
+    });
+  }
 
   protected invalid(name: 'title' | 'description'): boolean {
     const control = this.form.controls[name];

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
-import { authGuard, guestGuard } from './auth.guard';
+import { authGuard, guestGuard, staffGuard } from './auth.guard';
 
 function run(guard: typeof authGuard, url = '/cases/abc') {
   return TestBed.runInInjectionContext(() =>
@@ -9,7 +9,7 @@ function run(guard: typeof authGuard, url = '/cases/abc') {
   );
 }
 
-function withSession(active: boolean) {
+function withSession(active: boolean, role = 'ANALYST') {
   localStorage.clear();
   if (active) {
     localStorage.setItem(
@@ -17,7 +17,7 @@ function withSession(active: boolean) {
       JSON.stringify({
         token: 't',
         expiresAt: new Date(Date.now() + 60_000).toISOString(),
-        user: { id: 'u', name: 'U', email: 'u@t.com', role: 'ANALYST' },
+        user: { id: 'u', name: 'U', email: 'u@t.com', role },
       }),
     );
   }
@@ -36,9 +36,19 @@ describe('guards', () => {
     expect(result.toString()).toBe('/login?returnUrl=%2Fcases%2Fabc');
   });
 
-  it('guestGuard manda a /cases si ya hay sesión', () => {
+  it('guestGuard manda al dashboard si ya hay sesión', () => {
     withSession(true);
-    expect((run(guestGuard) as UrlTree).toString()).toBe('/cases');
+    expect((run(guestGuard) as UrlTree).toString()).toBe('/dashboard');
+  });
+
+  it('staffGuard deja pasar a un analista', () => {
+    withSession(true);
+    expect(run(staffGuard)).toBe(true);
+  });
+
+  it('staffGuard devuelve al dashboard a un solicitante', () => {
+    withSession(true, 'REQUESTER');
+    expect((run(staffGuard) as UrlTree).toString()).toBe('/dashboard');
   });
 
   it('guestGuard deja ver el login sin sesión', () => {

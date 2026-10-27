@@ -1,0 +1,15 @@
+.set { display: flex; flex-direction: column; gap: 24px; }
+.profile { display: flex; align-items: center; gap: 24px; padding: 28px; border-left: 3px solid var(--cyan); }
+.big-av { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 72px; height: 72px; border-radius: 999px; background: var(--cyan-dim); color: var(--cyan); font-size: 1.5rem; font-weight: 900; }
+.p-name { font-size: 1.25rem; font-weight: 800; line-height: 1.2; color: var(--text-1); }
+.p-mail { margin-top: 5px; font-size: 0.85rem; }
+.p-role { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 5px 14px; border-radius: 999px; background: var(--cyan-dim); font-size: 0.78rem; font-weight: 700; color: var(--cyan); }
+
+.s-head { display: flex; align-items: center; gap: 14px; padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+.s-head p { font-size: 0.95rem; font-weight: 700; color: var(--text-1); }
+.s-ico { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px; }
+.field-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+.field-row.last { border-bottom: 0; }
+.f-label { font-size: 0.88rem; color: var(--text-3); }
+.f-value { font-size: 0.88rem; font-weight: 600; text-align: right; color: var(--text-1); }
+.foot { padding-bottom: 8px; text-align: center; font-size: 0.7rem; }

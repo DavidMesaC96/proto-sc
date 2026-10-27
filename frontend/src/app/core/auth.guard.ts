@@ -15,5 +15,12 @@ export const authGuard: CanActivateFn = (_route, state) => {
 export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  return auth.isAuthenticated() ? router.createUrlTree(['/cases']) : true;
+  return auth.isAuthenticated() ? router.createUrlTree(['/dashboard']) : true;
+};
+
+/** Pantallas solo para analistas y responsables; un solicitante vuelve al dashboard. */
+export const staffGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return auth.isStaff() ? true : router.createUrlTree(['/dashboard']);
 };

@@ -1,0 +1,104 @@
+<div class="dash fade-up">
+  <app-page-header [title]="title()" [subtitle]="subtitle()" />
+
+  @if (error()) {
+    <div class="glass-card box"><p class="err">{{ error() }}</p></div>
+  } @else {
+    <!-- KPIs -->
+    <div class="kpis fade-up d1">
+      <app-metric-widget label="Tickets activos" [value]="open() + inProgress()" [sub]="inProgress() + ' en gestión'" color="cyan" href="/cases" [queryParams]="{ status: 'IN_PROGRESS' }" [raw]="ratio(open() + inProgress())">
+        <svg lucideTicket [size]="22"></svg>
+      </app-metric-widget>
+      <app-metric-widget label="SLA compliance" [value]="sla() + '%'" [sub]="resolved() + ' resueltos'" color="green" [href]="isStaff() ? '/reports' : '/cases'" [raw]="sla() / 100">
+        <svg lucideCircleCheckBig [size]="22"></svg>
+      </app-metric-widget>
+      <app-metric-widget label="Con proveedor" [value]="withProvider()" sub="esperando respuesta" color="purple" href="/cases" [queryParams]="{ status: 'WAITING_PROVIDER' }" [raw]="ratio(withProvider())">
+        <svg lucideBuilding [size]="22"></svg>
+      </app-metric-widget>
+      <app-metric-widget label="Críticos abiertos" [value]="critical().length" sub="atención inmediata" [color]="critical().length > 0 ? 'red' : 'green'" [href]="isStaff() ? '/incidents' : '/cases'" [raw]="ratio(critical().length)">
+        <svg lucideTriangleAlert [size]="22"></svg>
+      </app-metric-widget>
+    </div>
+
+    <!-- Alerta de críticos -->
+    @if (critical().length > 0) {
+      <div class="alert-crit fade-in">
+        <svg lucideCircleAlert [size]="18" style="color: var(--red); flex-shrink: 0"></svg>
+        <p class="a-count">{{ critical().length }} crítico{{ critical().length > 1 ? 's' : '' }} —</p>
+        <div class="a-links">
+          @for (c of critical().slice(0, 2); track c.id) {
+            <a [routerLink]="['/cases', c.id]">{{ c.title }}</a>
+          }
+          @if (critical().length > 2) {
+            <a [routerLink]="isStaff() ? '/incidents' : '/cases'" class="hint more">+{{ critical().length - 2 }} más</a>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Cola de tickets -->
+    <div class="glass-card overflow-hidden fade-up d4">
+      <div class="section-header">
+        <div class="sh-left">
+          <span class="section-title">Todos los casos</span>
+          <span class="count-badge">{{ total() }}</span>
+          @if (open() > 0) { <span class="meta-tag meta-tag--cyan">{{ open() }} abiertos</span> }
+          @if (inProgress() > 0) { <span class="meta-tag meta-tag--amber">{{ inProgress() }} en gestión</span> }
+          @if (withProvider() > 0) { <span class="meta-tag meta-tag--purple">↗ {{ withProvider() }} proveedor</span> }
+        </div>
+        <a routerLink="/cases" class="section-action">Ver todos <svg lucideExternalLink [size]="12"></svg></a>
+      </div>
+
+      @if (loading()) {
+        <div class="empty"><p class="hint">Cargando casos…</p></div>
+      } @else if (total() === 0) {
+        <div class="empty">
+          <div class="emoji">📭</div>
+          <p class="e-title">Sin tickets activos</p>
+          <p class="hint e-hint">Crea el primer caso para comenzar.</p>
+          <a routerLink="/cases/new" class="btn btn-cyan">+ Nuevo ticket</a>
+        </div>
+      } @else {
+        @for (c of queue(); track c.id; let last = $last) {
+          <a class="ticket-row" [attr.data-priority]="c.priority" [routerLink]="['/cases', c.id]" [style.border-bottom]="last ? 'none' : '1px solid var(--border)'">
+            <div class="ticket-accent" [attr.data-priority]="c.priority"></div>
+            <div class="ticket-body">
+              <div class="t-main">
+                <div class="t-line">
+                  @if (c.priority === 'CRITICAL') { <span class="p-dot pulse" style="background: var(--red)"></span> }
+                  <p class="t">{{ c.title }}</p>
+                </div>
+                <div class="t-meta">
+                  @if (c.escalation) { <span class="meta-tag meta-tag--purple">↗ {{ c.escalation.provider?.name }}</span> }
+                  <span class="hint m">{{ c.updatesCount }} nota{{ c.updatesCount === 1 ? '' : 's' }}</span>
+                  <span class="hint m">· {{ categoryLabel[c.category] }}</span>
+                  @if (c.requester?.department) { <span class="hint m">· {{ c.requester?.department }}</span> }
+                </div>
+              </div>
+
+              <div class="shrink"><app-status-badge [status]="c.status" /></div>
+
+              @if (isStaff()) {
+                <div class="req">
+                  <div class="avatar avatar-sm avatar-slate" [attr.title]="c.requester?.name">{{ initials(c.requester?.name) }}</div>
+                  <span class="req-name">{{ c.requester?.name?.split(' ')?.[0] }}</span>
+                </div>
+              }
+
+              @if (c.assignedTo; as a) {
+                <div class="avatar avatar-sm avatar-cyan" [attr.title]="'Asignado: ' + a.name">{{ initials(a.name) }}</div>
+              }
+
+              <div class="when">
+                @if (c.estimatedTime) { <p class="est">{{ c.estimatedTime }}h</p> }
+                <p class="hint d">{{ c.createdAt | date: 'dd MMM' }}</p>
+              </div>
+
+              <svg lucideExternalLink [size]="12" style="color: var(--text-3); flex-shrink: 0"></svg>
+            </div>
+          </a>
+        }
+      }
+    </div>
+  }
+</div>

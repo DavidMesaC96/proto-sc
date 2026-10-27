@@ -1,0 +1,67 @@
+<div class="inc fade-up">
+  <app-page-header title="Incidentes" [subtitle]="subtitle()" />
+
+  @if (loading()) {
+    <div class="glass-card empty"><p class="hint">Cargando incidentes…</p></div>
+  } @else if (error()) {
+    <div class="glass-card empty"><p class="err">{{ error() }}</p></div>
+  } @else {
+    @if (critical().length > 0) {
+      <div class="glass-card crit fade-in">
+        <div class="crit-head">
+          <svg lucideTriangleAlert [size]="18" style="color: var(--red)"></svg>
+          <span>{{ critical().length }} incidente{{ critical().length > 1 ? 's' : '' }} crítico{{ critical().length > 1 ? 's' : '' }} activo{{ critical().length > 1 ? 's' : '' }}</span>
+        </div>
+        <div class="crit-list">
+          @for (c of critical(); track c.id) {
+            <a class="trow crit-row" [routerLink]="['/cases', c.id]">
+              <div class="crit-left">
+                <span class="pulse dot"></span>
+                <span class="crit-title">{{ c.title }}</span>
+              </div>
+              <svg lucideExternalLink [size]="14" style="color: var(--text-3)"></svg>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+    @if (active().length > 0) {
+      <div class="glass-card overflow-hidden">
+        <div class="band"><p>En curso · {{ active().length }}</p></div>
+        @for (c of active(); track c.id; let last = $last) {
+          <a class="trow row" [class.last]="last" [routerLink]="['/cases', c.id]">
+            <div class="grow">
+              <p class="title">{{ c.title }}</p>
+              <p class="hint sub">{{ c.requester?.name }}{{ c.requester?.department ? ' · ' + c.requester?.department : '' }}</p>
+            </div>
+            <app-status-badge [status]="c.status" />
+            <app-priority-badge [priority]="c.priority" />
+            <svg lucideExternalLink [size]="14" style="color: var(--text-3); flex-shrink: 0"></svg>
+          </a>
+        }
+      </div>
+    }
+
+    @if (resolved().length > 0) {
+      <div class="glass-card overflow-hidden">
+        <div class="band"><p class="muted">Resueltos · {{ resolved().length }}</p></div>
+        @for (c of resolved(); track c.id; let last = $last) {
+          <a class="trow row done" [class.last]="last" [routerLink]="['/cases', c.id]">
+            <div class="grow"><p class="title light">{{ c.title }}</p></div>
+            <app-status-badge [status]="c.status" />
+            <svg lucideExternalLink [size]="14" style="color: var(--text-3); flex-shrink: 0"></svg>
+          </a>
+        }
+      </div>
+    }
+
+    @if (total() === 0) {
+      <div class="glass-card empty">
+        <div class="emoji">✅</div>
+        <p class="e-title">Sin incidentes activos</p>
+        <p class="hint">El sistema opera con normalidad.</p>
+      </div>
+    }
+  }
+</div>

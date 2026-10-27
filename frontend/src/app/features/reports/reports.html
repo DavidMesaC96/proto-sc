@@ -1,0 +1,80 @@
+<div class="rep fade-up">
+  <app-page-header title="Reportes" [subtitle]="total() + ' casos en total · vista general'" [showNewTicket]="false" />
+
+  @if (error()) {
+    <div class="glass-card box"><p class="err">{{ error() }}</p></div>
+  } @else {
+    <div class="kpis fade-up d1">
+      <app-metric-widget label="Total casos" [value]="total()" sub="en el sistema" color="cyan" href="/cases" [raw]="1">
+        <svg lucideChartColumn [size]="22"></svg>
+      </app-metric-widget>
+      <app-metric-widget label="SLA compliance" [value]="sla() + '%'" [sub]="finished() + ' resueltos'" color="green" href="/reports" [raw]="sla() / 100">
+        <svg lucideTrendingUp [size]="22"></svg>
+      </app-metric-widget>
+      <app-metric-widget label="Resueltos" [value]="finished()" [sub]="'de ' + total() + ' casos'" color="green" href="/cases" [queryParams]="{ status: 'RESOLVED' }" [raw]="ratio(finished())">
+        <svg lucideCircleCheckBig [size]="22"></svg>
+      </app-metric-widget>
+      <app-metric-widget label="En proveedor" [value]="withProvider()" sub="esperando respuesta" color="purple" href="/cases" [queryParams]="{ status: 'WAITING_PROVIDER' }" [raw]="ratio(withProvider())">
+        <svg lucideBuilding [size]="22"></svg>
+      </app-metric-widget>
+    </div>
+
+    <div class="cols">
+      <div class="glass-card panel fade-up d2">
+        <p class="hint uppercase tracking-widest cap">Por estado</p>
+        <div class="bars">
+          @for (s of statusBars(); track s.key) {
+            <div>
+              <div class="b-head">
+                <span class="b-label">{{ s.label }}</span>
+                <span class="b-count" [style.color]="s.color">{{ s.count }}</span>
+              </div>
+              <div class="b-track"><div class="b-fill" [style.width.%]="pct(s.count)" [style.background]="s.color"></div></div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="glass-card panel fade-up d3">
+        <p class="hint uppercase tracking-widest cap">Por prioridad</p>
+        <div class="bars">
+          @for (p of priorityBars(); track p.key) {
+            <div>
+              <div class="b-head">
+                <div class="b-name"><span class="b-dot" [style.background]="p.color"></span><span class="b-label">{{ p.label }}</span></div>
+                <span class="b-count" [style.color]="p.color">{{ p.count }}</span>
+              </div>
+              <div class="b-track"><div class="b-fill" [style.width.%]="pct(p.count)" [style.background]="p.color"></div></div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="glass-card panel fade-up d4">
+        <p class="hint uppercase tracking-widest cap">Por categoría</p>
+        <div class="bars wide">
+          @for (c of categoryBars(); track c.label) {
+            <div class="cat-row">
+              <span class="b-label">{{ c.label }}</span>
+              <div class="cat-right">
+                <div class="mini"><div class="b-fill" [style.width.%]="pct(c.count)" style="background: var(--cyan)"></div></div>
+                <span class="cat-n">{{ c.count }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (providers().length > 0) {
+          <div class="sep"></div>
+          <p class="hint uppercase tracking-widest cap">Escalados a proveedor</p>
+          @for (p of providers(); track p.name) {
+            <div class="prov">
+              <div class="b-name"><svg lucideBuilding [size]="14" style="color: var(--text-3)"></svg><span class="b-label">{{ p.name }}</span></div>
+              <span class="prov-n">{{ p.count }}</span>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>

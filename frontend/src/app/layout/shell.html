@@ -28,26 +28,15 @@
     <!-- Navegación -->
     <nav class="nav" aria-label="Navegación principal">
       @for (item of nav(); track item.path) {
-        @if (item.ready) {
-          <a [routerLink]="item.path" routerLinkActive="active" class="nav-link" [attr.title]="collapsed() ? item.label : null">
-            <span class="tile">
-              <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{ $implicit: item.icon }" />
-            </span>
-            @if (!collapsed()) {
-              <span class="label">{{ item.label }}</span>
-              <span class="bar"></span>
-            }
-          </a>
-        } @else {
-          <span class="nav-link soon" title="Próximamente" aria-disabled="true">
-            <span class="tile">
-              <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{ $implicit: item.icon }" />
-            </span>
-            @if (!collapsed()) {
-              <span class="label">{{ item.label }}</span>
-            }
+        <a [routerLink]="item.path" routerLinkActive="active" class="nav-link" [attr.title]="collapsed() ? item.label : null">
+          <span class="tile">
+            <ng-container [ngTemplateOutlet]="icon" [ngTemplateOutletContext]="{ $implicit: item.icon }" />
           </span>
-        }
+          @if (!collapsed()) {
+            <span class="label">{{ item.label }}</span>
+            <span class="bar"></span>
+          }
+        </a>
       }
     </nav>
 
@@ -55,7 +44,7 @@
 
     <!-- Health Status + Nuevo ticket -->
     <div class="actions">
-      <span class="health soon" title="Próximamente" aria-disabled="true">
+      <a routerLink="/health" routerLinkActive="on" class="health">
         <span class="health-ico">
           <span class="health-tile"><svg lucideActivity [size]="17" [strokeWidth]="2"></svg></span>
           <span class="health-dot"></span>
@@ -66,7 +55,7 @@
             <small>Sauron · Grafana Stack</small>
           </span>
         }
-      </span>
+      </a>
 
       <a routerLink="/cases/new" class="new-ticket" [class.col]="collapsed()">
         <svg lucidePlus [size]="14" [strokeWidth]="2.5"></svg>
@@ -86,10 +75,10 @@
         </div>
       }
 
-      <span class="nav-link soon" title="Próximamente" aria-disabled="true">
+      <a routerLink="/settings" routerLinkActive="active" class="nav-link" [attr.title]="collapsed() ? 'Ajustes' : null">
         <span class="tile"><svg lucideSettings [size]="21" [strokeWidth]="1.8"></svg></span>
         @if (!collapsed()) { <span class="label">Ajustes</span> }
-      </span>
+      </a>
 
       <button type="button" class="nav-link collapse" (click)="toggle()" [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'">
         <span class="tile dim">

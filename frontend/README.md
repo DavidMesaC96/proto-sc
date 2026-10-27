@@ -42,8 +42,16 @@ npm test -- --watch=false
 npm run build
 ```
 
-## Pendiente de migrar desde Next.js
+## Pantallas
 
-Dashboard, incidentes, catálogo, reportes, usuarios, health y ajustes. En el menú aparecen
-atenuados con "Próximamente". Dentro del detalle, las pestañas Asignar y Cerrar del panel de gestión
-son solo la forma, igual que en el original.
+| Ruta | Quién | Datos |
+|---|---|---|
+| `/dashboard` | todos | KPIs y cola, calculados con `GET /api/cases` |
+| `/cases`, `/cases/:id`, `/cases/new` | todos | casos, historial, gestión y escalamiento |
+| `/incidents`, `/reports`, `/users` | analistas y responsables (`staffGuard`) | `GET /api/cases`, `GET /api/users` |
+| `/catalog` | todos | estático; cada servicio precarga `/cases/new` |
+| `/health` | todos | pantalla "en construcción", como en el original |
+| `/settings` | todos | perfil real; notificaciones y seguridad son de muestra |
+
+En el panel de gestión del detalle, las pestañas Asignar y Cerrar son solo la forma, igual que en el
+original.

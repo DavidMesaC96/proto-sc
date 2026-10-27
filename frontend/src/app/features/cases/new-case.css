@@ -1,7 +1,6 @@
 .wrap { max-width: 42rem; margin: 0 auto; }
 .crumbs { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
 .crumbs .bc-link { font-size: 0.82rem; }
-.crumbs .soon { cursor: default; opacity: 0.6; }
 .here { font-size: 0.82rem; font-weight: 700; color: #002b7a; }
 
 .band { padding: 20px 28px; background: #f4f6f8; }

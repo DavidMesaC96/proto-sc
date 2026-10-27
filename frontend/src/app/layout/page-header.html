@@ -38,9 +38,9 @@
             </div>
           </div>
           <div class="menu-body">
-            <span class="menu-item soon" role="menuitem" aria-disabled="true" title="Próximamente">
+            <a routerLink="/settings" class="topbar-menu-item menu-item" role="menuitem" (click)="menuOpen.set(false)">
               <svg lucideSettings [size]="16"></svg> Ajustes
-            </span>
+            </a>
           </div>
           <div class="menu-body top">
             <button type="button" class="topbar-menu-item-danger menu-item danger" role="menuitem" (click)="logout()">

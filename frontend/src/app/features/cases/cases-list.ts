@@ -5,7 +5,8 @@ import { LucideExternalLink, LucideFunnel } from '@lucide/angular';
 import { AuthService } from '../../core/auth.service';
 import { CasesService } from '../../core/cases.service';
 import { errorMessage } from '../../core/http-error';
-import { Case, PRIORITY_STYLE } from '../../core/models';
+import { byUrgency } from '../../core/case-order';
+import { Case } from '../../core/models';
 import { PageHeader } from '../../layout/page-header';
 import { PriorityBadge, StatusBadge } from '../../shared/badges';
 
@@ -65,11 +66,7 @@ export class CasesList {
     const priority = this.priorityFilter();
     return this.cases()
       .filter((c) => (!status || c.status === status) && (!priority || c.priority === priority))
-      .sort(
-        (a, b) =>
-          PRIORITY_STYLE[b.priority].rank - PRIORITY_STYLE[a.priority].rank ||
-          b.updatedAt.localeCompare(a.updatedAt),
-      );
+      .sort(byUrgency);
   });
 
   protected readonly subtitle = computed(() => {

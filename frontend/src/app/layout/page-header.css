@@ -28,7 +28,7 @@
 .menu-body { padding: 8px; }
 .menu-body.top { border-top: 1px solid rgba(0, 43, 122, 0.08); }
 .menu-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: 0; border-radius: 10px; background: transparent; color: #374151; font-size: 0.88rem; text-align: left; transition: all 0.15s; }
-.menu-item.soon { opacity: 0.55; cursor: default; }
+.menu-item { text-decoration: none; }
 .menu-item.danger { color: var(--red); cursor: pointer; }
 
 .new { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; height: 42px; padding: 0 22px; border-radius: 999px; background: #00c853; color: #fff; font-size: 0.88rem; font-weight: 800; text-decoration: none; white-space: nowrap; box-shadow: 0 4px 16px rgba(0, 200, 83, 0.3); transition: all 0.15s; }

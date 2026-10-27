@@ -20,6 +20,12 @@ export interface User {
   createdAt: string;
 }
 
+/** Fila del directorio de usuarios, con sus conteos de casos. */
+export interface UserListItem extends User {
+  requestedCases: number;
+  assignedCases: number;
+}
+
 /** Datos mínimos de un usuario embebido en otro recurso. */
 export interface UserBrief {
   id: string;

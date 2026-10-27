@@ -1,0 +1,68 @@
+<div class="usr fade-up">
+  <app-page-header title="Usuarios" [subtitle]="subtitle()" />
+
+  @if (error()) {
+    <div class="panel pad"><p class="err">{{ error() }}</p></div>
+  } @else {
+    <div class="kpis">
+      <div class="kpi">
+        <div class="k-ico" style="background: rgba(0, 43, 122, 0.07); color: #002b7a"><svg lucideShield [size]="22"></svg></div>
+        <div><p class="k-n">{{ managers() }}</p><p class="k-l">Responsables</p></div>
+      </div>
+      <div class="kpi">
+        <div class="k-ico" style="background: rgba(0, 200, 83, 0.08); color: #007a3d"><svg lucideUserCheck [size]="22"></svg></div>
+        <div><p class="k-n">{{ analysts() }}</p><p class="k-l">Analistas</p></div>
+      </div>
+      <div class="kpi">
+        <div class="k-ico" style="background: rgba(107, 114, 128, 0.07); color: #6b7280"><svg lucideUser [size]="22"></svg></div>
+        <div><p class="k-n">{{ requesters() }}</p><p class="k-l">Solicitantes</p></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="p-head">
+        <svg lucideUsers [size]="17" style="color: #002b7a"></svg>
+        <span class="p-title">Todos los usuarios</span>
+        <span class="p-count">{{ users().length }}</span>
+      </div>
+
+      <div class="cols head">
+        <span>Usuario</span><span>Correo</span><span>Rol</span><span>Departamento</span><span>Casos</span>
+      </div>
+
+      @if (loading()) {
+        <div class="pad"><p class="hint">Cargando usuarios…</p></div>
+      }
+
+      @for (u of users(); track u.id; let last = $last) {
+        <div class="cols row" [class.last]="last">
+          <div class="who">
+            <div class="av" [style.background]="roleCfg[u.role].bg" [style.color]="roleCfg[u.role].color">{{ initials(u.name) }}</div>
+            <div>
+              <p class="name">{{ u.name }}</p>
+              <p class="since">Desde {{ u.createdAt | date: 'dd MMM y' }}</p>
+            </div>
+          </div>
+
+          <p class="mail">{{ u.email }}</p>
+
+          <div class="role">
+            <span class="role-pill" [style.background]="roleCfg[u.role].bg" [style.color]="roleCfg[u.role].color">
+              @switch (u.role) {
+                @case ('MANAGER') { <svg lucideShield [size]="11"></svg> }
+                @case ('ANALYST') { <svg lucideUserCheck [size]="11"></svg> }
+                @case ('REQUESTER') { <svg lucideUser [size]="11"></svg> }
+              }
+              {{ roleCfg[u.role].label }}
+            </span>
+            <span class="role-code">{{ u.role }}</span>
+          </div>
+
+          <p class="dep">{{ u.department ?? '—' }}</p>
+
+          <span class="n" [class.zero]="cases(u) === 0">{{ cases(u) }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>

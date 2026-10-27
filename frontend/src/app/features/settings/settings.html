@@ -1,0 +1,35 @@
+<div class="set fade-up">
+  <app-page-header title="Ajustes" subtitle="Configuración de cuenta y preferencias" [showNewTicket]="false" />
+
+  <div class="glass-card profile">
+    <div class="big-av">{{ initials() }}</div>
+    <div>
+      <p class="p-name">{{ user()?.name }}</p>
+      <p class="hint p-mail">{{ user()?.email }}</p>
+      <div class="p-role">{{ roleLabel() }}</div>
+    </div>
+  </div>
+
+  @for (section of sections(); track section.title) {
+    <div class="glass-card overflow-hidden">
+      <div class="s-head">
+        <div class="s-ico" [style.background]="section.bg" [style.color]="section.color">
+          @switch (section.icon) {
+            @case ('user') { <svg lucideUser [size]="18"></svg> }
+            @case ('bell') { <svg lucideBell [size]="18"></svg> }
+            @case ('shield') { <svg lucideShield [size]="18"></svg> }
+          }
+        </div>
+        <p>{{ section.title }}</p>
+      </div>
+      @for (f of section.fields; track f.label; let last = $last) {
+        <div class="field-row" [class.last]="last">
+          <p class="f-label">{{ f.label }}</p>
+          <p class="f-value">{{ f.value }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  <p class="hint foot">Para cambiar tu contraseña o rol, contacta al administrador del sistema.</p>
+</div>

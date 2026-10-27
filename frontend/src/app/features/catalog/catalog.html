@@ -1,0 +1,46 @@
+<div class="cat fade-up">
+  <app-page-header title="Catálogo de servicios" subtitle="Selecciona un servicio para crear un ticket pre-configurado" />
+
+  <div class="sections">
+    @for (section of sections; track section.category; let si = $index) {
+      <section [class]="'fade-up d' + (si + 1)">
+        <div class="sec-head">
+          <div class="sec-ico" [style.background]="section.bg" [style.color]="section.color">
+            @switch (section.icon) {
+              @case ('zap') { <svg lucideZap [size]="18"></svg> }
+              @case ('file') { <svg lucideFileText [size]="18"></svg> }
+              @case ('refresh') { <svg lucideRefreshCw [size]="18"></svg> }
+              @case ('help') { <svg lucideCircleQuestionMark [size]="18"></svg> }
+            }
+          </div>
+          <p class="sec-title" [style.color]="section.color">{{ section.category }}</p>
+          <div class="sec-line"></div>
+          <span class="hint">{{ section.items.length }} servicios</span>
+        </div>
+
+        <div class="grid">
+          @for (item of section.items; track item.title) {
+            <a
+              class="glass-card glass-card-hover item"
+              routerLink="/cases/new"
+              [queryParams]="{ title: item.title, category: section.caseCategory, priority: item.priority }"
+            >
+              <div class="i-top">
+                <p class="i-title">{{ item.title }}</p>
+                <svg lucideChevronRight [size]="16" style="color: var(--text-3); flex-shrink: 0; margin-top: 2px"></svg>
+              </div>
+              <p class="hint i-desc">{{ item.desc }}</p>
+              <div class="i-foot">
+                <div class="i-prio">
+                  <span class="i-dot" [style.background]="toneOf(item.priority)"></span>
+                  <span [style.color]="toneOf(item.priority)">{{ priorityStyle[item.priority].label }}</span>
+                </div>
+                <span class="hint">SLA · {{ item.sla }}</span>
+              </div>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</div>

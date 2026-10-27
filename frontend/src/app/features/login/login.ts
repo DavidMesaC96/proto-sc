@@ -57,7 +57,7 @@ export class Login {
       next: () => {
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         // Solo se acepta una ruta interna para evitar redirecciones abiertas.
-        const target = returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/cases';
+        const target = returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/dashboard';
         void this.router.navigateByUrl(target);
       },
       error: (err) => {

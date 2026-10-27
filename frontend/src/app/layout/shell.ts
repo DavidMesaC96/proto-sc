@@ -23,17 +23,15 @@ interface NavItem {
   label: string;
   icon: 'dashboard' | 'ticket' | 'siren' | 'book' | 'chart' | 'users';
   roles: Role[];
-  /** false = pantalla aún no migrada desde Next.js. */
-  ready: boolean;
 }
 
 const ALL_NAV: NavItem[] = [
-  { path: '/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['REQUESTER', 'ANALYST', 'MANAGER'], ready: false },
-  { path: '/cases', label: 'Tickets', icon: 'ticket', roles: ['REQUESTER', 'ANALYST', 'MANAGER'], ready: true },
-  { path: '/incidents', label: 'Incidentes', icon: 'siren', roles: ['ANALYST', 'MANAGER'], ready: false },
-  { path: '/catalog', label: 'Catálogo', icon: 'book', roles: ['REQUESTER', 'ANALYST', 'MANAGER'], ready: false },
-  { path: '/reports', label: 'Reportes', icon: 'chart', roles: ['MANAGER'], ready: false },
-  { path: '/users', label: 'Usuarios', icon: 'users', roles: ['ANALYST', 'MANAGER'], ready: false },
+  { path: '/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['REQUESTER', 'ANALYST', 'MANAGER'] },
+  { path: '/cases', label: 'Tickets', icon: 'ticket', roles: ['REQUESTER', 'ANALYST', 'MANAGER'] },
+  { path: '/incidents', label: 'Incidentes', icon: 'siren', roles: ['ANALYST', 'MANAGER'] },
+  { path: '/catalog', label: 'Catálogo', icon: 'book', roles: ['REQUESTER', 'ANALYST', 'MANAGER'] },
+  { path: '/reports', label: 'Reportes', icon: 'chart', roles: ['MANAGER'] },
+  { path: '/users', label: 'Usuarios', icon: 'users', roles: ['ANALYST', 'MANAGER'] },
 ];
 
 @Component({
