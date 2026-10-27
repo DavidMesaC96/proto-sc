@@ -82,6 +82,14 @@ function getRandomElement<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function toEmail(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, ".");
+}
+
 function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -100,34 +108,36 @@ async function main() {
   // Create requesters
   console.log("📝 Creando solicitantes...");
   const requesters = await Promise.all(
-    NAMES_REQUESTER.map((name) =>
-      prisma.user.create({
+    NAMES_REQUESTER.map(async (name) => {
+      const password = await hash("password123");
+      return prisma.user.create({
         data: {
           name,
-          email: `${name.toLowerCase().replace(" ", ".")}@sistecredito.com`,
-          password: await hash("password123"),
+          email: `${toEmail(name)}@sistecredito.com`,
+          password,
           role: "REQUESTER",
           department: getRandomElement(DEPARTMENTS),
         },
-      })
-    )
+      });
+    })
   );
   console.log(`✅ ${requesters.length} solicitantes creados\n`);
 
   // Create analysts
   console.log("👨‍💼 Creando analistas...");
   const analysts = await Promise.all(
-    NAMES_ANALYST.map((name) =>
-      prisma.user.create({
+    NAMES_ANALYST.map(async (name) => {
+      const password = await hash("password123");
+      return prisma.user.create({
         data: {
           name,
-          email: `${name.toLowerCase().replace(" ", ".")}@sistecredito.com`,
-          password: await hash("password123"),
+          email: `${toEmail(name)}@sistecredito.com`,
+          password,
           role: "ANALYST",
           department: "Mesa de Servicios",
         },
-      })
-    )
+      });
+    })
   );
   console.log(`✅ ${analysts.length} analistas creados\n`);
 
