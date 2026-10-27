@@ -67,11 +67,26 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                 <PriorityBadge priority={c.priority} />
               </div>
               {cat && (
-                <div className="flex items-center gap-1.5" style={{ color: "var(--text-3)" }}>
+                <div className="flex items-center gap-1.5 mb-3" style={{ color: "var(--text-3)" }}>
                   <cat.Icon size={12} />
                   <span className="hint">{cat.label}</span>
                 </div>
               )}
+              <div style={{
+                background: "rgba(0,43,122,.04)",
+                border: "1px solid rgba(0,43,122,.08)",
+                borderRadius: 8,
+                padding: "8px 10px",
+              }}>
+                <p className="hint" style={{ fontSize: ".62rem", marginBottom: 3 }}>ID DEL TICKET</p>
+                <p style={{
+                  fontFamily: "monospace",
+                  fontSize: ".72rem",
+                  color: "var(--text-2)",
+                  wordBreak: "break-all",
+                  lineHeight: 1.4,
+                }}>{c.id}</p>
+              </div>
             </div>
 
             <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>

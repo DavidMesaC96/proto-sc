@@ -151,15 +151,24 @@ export default async function UsersPage() {
               <p style={{ fontSize: ".82rem", color: "#374151" }}>{u.email}</p>
 
               {/* Rol */}
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "4px 10px", borderRadius: 999,
-                background: cfg.bg, color: cfg.color,
-                fontSize: ".68rem", fontWeight: 700,
-              }}>
-                <cfg.Icon size={11} />
-                {cfg.label}
-              </span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  padding: "4px 10px", borderRadius: 999,
+                  background: cfg.bg, color: cfg.color,
+                  fontSize: ".68rem", fontWeight: 700,
+                  width: "fit-content",
+                }}>
+                  <cfg.Icon size={11} />
+                  {cfg.label}
+                </span>
+                <span style={{
+                  fontSize: ".62rem", color: "#9CA3AF",
+                  fontFamily: "monospace", letterSpacing: ".03em",
+                }}>
+                  {u.role}
+                </span>
+              </div>
 
               {/* Departamento */}
               <p style={{ fontSize: ".82rem", color: "#6B7280" }}>{u.department ?? "—"}</p>

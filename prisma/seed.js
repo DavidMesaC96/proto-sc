@@ -78,6 +78,14 @@ const STATUSES = ["OPEN", "IN_PROGRESS", "WAITING_USER", "WAITING_PROVIDER", "RE
 const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
 const CATEGORIES = ["INCIDENT", "REQUEST", "CHANGE"];
 
+function toEmail(name) {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, ".");
+}
+
 function getRandomElement(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -106,7 +114,7 @@ async function main() {
       return prisma.user.create({
         data: {
           name,
-          email: `${name.toLowerCase().replace(" ", ".")}@sistecredito.com`,
+          email: `${toEmail(name)}@sistecredito.com`,
           password,
           role: "REQUESTER",
           department: getRandomElement(DEPARTMENTS),
@@ -123,7 +131,7 @@ async function main() {
       return prisma.user.create({
         data: {
           name,
-          email: `${name.toLowerCase().replace(" ", ".")}@sistecredito.com`,
+          email: `${toEmail(name)}@sistecredito.com`,
           password,
           role: "ANALYST",
           department: "Mesa de Servicios",

@@ -15,9 +15,10 @@ URL local: http://localhost:3000
 
 ## Manager
 
-| Nombre             | Email                                | Contraseña  |
-|--------------------|--------------------------------------|-------------|
-| Carlos Responsable | carlos.responsable@sistecredito.com  | password123 |
+| Nombre             | Email                                                                             | Contraseña  |
+| ------------------ | --------------------------------------------------------------------------------- | ----------- |
+| Carlos Responsable | [carlos.responsable@sistecredito.com](mailto:carlos.responsable@sistecredito.com) | password123 |
+|                    |                                                                                   |             |
 
 ## Solicitantes (Requester)
 

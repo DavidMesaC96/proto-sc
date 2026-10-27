@@ -10,9 +10,9 @@ import { Zap, ExternalLink, AlertTriangle } from "lucide-react";
 export default async function IncidentsPage() {
   const user = await getSession();
   if (!user) redirect("/login");
+  if (user.role === "REQUESTER") redirect("/dashboard");
 
   const where: Record<string, unknown> = { category: "INCIDENT" };
-  if (user.role === "REQUESTER") where.requesterId = user.id;
 
   const incidents = await prisma.case.findMany({
     where,
