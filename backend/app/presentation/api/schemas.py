@@ -39,6 +39,11 @@ class UserOut(CamelModel):
     created_at: datetime
 
 
+class UserListItemOut(UserOut):
+    requested_cases: int
+    assigned_cases: int
+
+
 class ProviderOut(CamelModel):
     id: str
     name: str

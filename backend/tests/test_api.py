@@ -156,3 +156,28 @@ def test_solicitante_no_puede_escalar(client, requester):
 def test_listar_proveedores(client, requester):
     res = client.get("/api/providers", headers=requester)
     assert [p["name"] for p in res.json()] == ["Telco"]
+
+
+# ---- usuarios ----
+
+def test_personal_de_la_mesa_lista_usuarios_con_conteos(client, requester, analyst):
+    create_case(client, requester)
+    me = client.get("/api/auth/me", headers=analyst).json()
+    case = client.get("/api/cases", headers=analyst).json()[0]
+    client.patch(f"/api/cases/{case['id']}", json={"assignedToId": me["id"]}, headers=analyst)
+
+    res = client.get("/api/users", headers=analyst)
+    assert res.status_code == 200
+    by_email = {u["email"]: u for u in res.json()}
+    assert by_email["ana@test.com"]["requestedCases"] == 1
+    assert by_email["laura@test.com"]["assignedCases"] == 1
+    assert by_email["otro@test.com"]["requestedCases"] == 0
+    assert "passwordHash" not in by_email["ana@test.com"]
+
+
+def test_solicitante_no_puede_listar_usuarios(client, requester):
+    assert client.get("/api/users", headers=requester).status_code == 403
+
+
+def test_listar_usuarios_exige_sesion(client):
+    assert client.get("/api/users").status_code == 401

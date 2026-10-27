@@ -2,7 +2,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.presentation.api.routers import auth, cases, providers
+from app.presentation.api.routers import auth, cases, providers, users
 from app.presentation.errors import register_error_handlers
 
 
@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
     api.include_router(auth.router)
     api.include_router(cases.router)
     api.include_router(providers.router)
+    api.include_router(users.router)
     app.include_router(api)
 
     @app.get("/health", tags=["health"])

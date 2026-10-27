@@ -13,6 +13,7 @@ from app.domain.entities import (
     Escalation,
     Provider,
     User,
+    UserWithCounts,
 )
 from app.domain.enums import (
     CaseCategory,
@@ -133,6 +134,29 @@ class SqlUserRepository(UserRepository):
     def get_by_email(self, email: str) -> User | None:
         m = self.db.scalar(select(UserModel).where(UserModel.email == email.strip().lower()))
         return to_user(m) if m else None
+
+    def list_with_counts(self) -> list[UserWithCounts]:
+        requested = dict(
+            self.db.execute(
+                select(CaseModel.requester_id, func.count()).group_by(CaseModel.requester_id)
+            ).all()
+        )
+        assigned = dict(
+            self.db.execute(
+                select(CaseModel.assigned_to_id, func.count())
+                .where(CaseModel.assigned_to_id.is_not(None))
+                .group_by(CaseModel.assigned_to_id)
+            ).all()
+        )
+        rows = self.db.scalars(select(UserModel).order_by(UserModel.role, UserModel.name))
+        return [
+            UserWithCounts(
+                user=to_user(m),
+                requested_cases=requested.get(m.id, 0),
+                assigned_cases=assigned.get(m.id, 0),
+            )
+            for m in rows
+        ]
 
 
 class SqlSessionRepository(SessionRepository):

@@ -9,6 +9,7 @@ from app.domain.entities import (
     Escalation,
     Provider,
     User,
+    UserWithCounts,
 )
 
 
@@ -18,6 +19,10 @@ class UserRepository(ABC):
 
     @abstractmethod
     def get_by_email(self, email: str) -> User | None: ...
+
+    @abstractmethod
+    def list_with_counts(self) -> list[UserWithCounts]:
+        """Todos los usuarios ordenados por rol y nombre, con sus conteos de casos."""
 
 
 class SessionRepository(ABC):

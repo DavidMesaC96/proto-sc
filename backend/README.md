@@ -53,6 +53,7 @@ Usan SQLite en memoria y sustituyen el `UnitOfWork` por inyección de dependenci
 | POST | `/cases/{id}/updates` | Agregar comentario |
 | POST | `/cases/{id}/escalate` | Escalar a proveedor (solo analistas y responsables) |
 | GET | `/providers` | Proveedores |
+| GET | `/users` | Directorio con casos solicitados/asignados (solo analistas y responsables) |
 
 ## Migraciones
 

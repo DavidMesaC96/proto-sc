@@ -46,6 +46,15 @@ class User:
 
 
 @dataclass
+class UserWithCounts:
+    """Usuario con cuántos casos ha solicitado y cuántos tiene asignados."""
+
+    user: User
+    requested_cases: int = 0
+    assigned_cases: int = 0
+
+
+@dataclass
 class AuthSession:
     id: str
     user_id: str
