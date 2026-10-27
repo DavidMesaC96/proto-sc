@@ -16,15 +16,15 @@ export default function PageHeader({
 }: PageHeaderProps) {
   return (
     <div style={{
-      display: "flex", alignItems: "center", justifyContent: "space-between",
+      display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap",
       gap: 16, marginBottom: 28,
       paddingBottom: 24,
       borderBottom: "1px solid rgba(0,43,122,.08)",
     }}>
       {/* Title */}
-      <div style={{ minWidth: 0 }}>
+      <div style={{ minWidth: 0, flex: "1 1 280px" }}>
         <h1 style={{
-          fontSize: "1.85rem", fontWeight: 900, color: "#002B7A",
+          fontSize: "clamp(1.3rem, 2.6vw, 1.85rem)", fontWeight: 900, color: "#002B7A",
           letterSpacing: "-.03em", lineHeight: 1.1,
         }}>{title}</h1>
         {subtitle && (
@@ -33,7 +33,7 @@ export default function PageHeader({
       </div>
 
       {/* Actions */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
 
         <SearchBar />
 

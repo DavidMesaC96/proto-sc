@@ -9,7 +9,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--surface-1)" }}>
       <Sidebar userRole={user.role} userName={user.name} />
-      <main style={{ flex: 1, overflowY: "auto", padding: 24 }}>{children}</main>
+      <main className="app-main" style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>{children}</main>
     </div>
   );
 }

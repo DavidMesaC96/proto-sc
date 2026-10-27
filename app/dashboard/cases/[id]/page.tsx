@@ -1,12 +1,13 @@
 import { redirect, notFound } from "next/navigation";
-import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import StatusBadge from "@/components/StatusBadge";
 import PriorityBadge from "@/components/PriorityBadge";
 import CaseActions from "./CaseActions";
 import PageHeader from "@/components/PageHeader";
-import { ChevronRight, Zap, FileText, RefreshCw, Clock, Building2 } from "lucide-react";
+import {
+  Zap, FileText, RefreshCw, Clock, Building2, Phone, CalendarDays, Link2, ArrowRight, MessageSquare,
+} from "lucide-react";
 
 const CAT: Record<string, { label: string; Icon: React.ElementType }> = {
   INCIDENT: { label: "Incidente",  Icon: Zap       },
@@ -14,11 +15,19 @@ const CAT: Record<string, { label: string; Icon: React.ElementType }> = {
   CHANGE:   { label: "Cambio",     Icon: RefreshCw  },
 };
 
-const ROLE_STYLE: Record<string, { bg: string; color: string }> = {
-  REQUESTER: { bg: "var(--sky-dim)",   color: "var(--sky)"   },
-  ANALYST:   { bg: "var(--green-dim)", color: "var(--green)" },
-  MANAGER:   { bg: "var(--amber-dim)", color: "var(--amber)" },
+const ROLE_STYLE: Record<string, { bg: string; color: string; label: string }> = {
+  REQUESTER: { bg: "var(--sky-dim)",   color: "var(--sky)",   label: "Usuario"     },
+  ANALYST:   { bg: "var(--green-dim)", color: "var(--green)", label: "Analista"    },
+  MANAGER:   { bg: "var(--amber-dim)", color: "var(--amber)", label: "Responsable" },
 };
+
+const ESC_STATUS: Record<string, string> = {
+  PENDING: "Pendiente", IN_PROGRESS: "En curso", RESOLVED: "Resuelto",
+};
+
+function initials(name: string) {
+  return name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
+}
 
 export default async function CaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getSession();
@@ -42,6 +51,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   if (user.role === "REQUESTER" && c.requesterId !== user.id) redirect("/dashboard");
 
   const cat = CAT[c.category];
+  const elapsedHours = (new Date().getTime() - c.createdAt.getTime()) / 36e5;
+  const created = new Date(c.createdAt).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" }).replace(/ de /g, " ");
 
   return (
     <div className="fade-up">
@@ -53,197 +64,170 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         showNewTicket={false}
       />
 
-      {/* 3-column layout */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr 300px", gap: 20, alignItems: "start" }}>
+      <div className="cd-grid">
 
-        {/* ── Left: metadata & actions ── */}
-        <div className="space-y-4">
-          {/* Case meta */}
-          <div className="glass-card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
-            <div>
-              <p className="hint uppercase tracking-widest mb-3" style={{ fontSize: ".7rem" }}>Detalles</p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                <StatusBadge status={c.status} />
-                <PriorityBadge priority={c.priority} />
-              </div>
+        {/* ═════ Izquierda: metadatos y personas ═════ */}
+        <div className="cd-col">
+          <div className="cd-card">
+            <p className="cd-cap">Detalles</p>
+            <div className="cd-wrap" style={{ marginTop: 14 }}>
+              <StatusBadge status={c.status} />
+              <PriorityBadge priority={c.priority} />
               {cat && (
-                <div className="flex items-center gap-1.5 mb-3" style={{ color: "var(--text-3)" }}>
-                  <cat.Icon size={12} />
-                  <span className="hint">{cat.label}</span>
-                </div>
+                <span className="cd-chip"><cat.Icon size={12} /> {cat.label}</span>
               )}
-              <div style={{
-                background: "rgba(0,43,122,.04)",
-                border: "1px solid rgba(0,43,122,.08)",
-                borderRadius: 8,
-                padding: "8px 10px",
-              }}>
-                <p className="hint" style={{ fontSize: ".62rem", marginBottom: 3 }}>ID DEL TICKET</p>
-                <p style={{
-                  fontFamily: "monospace",
-                  fontSize: ".72rem",
-                  color: "var(--text-2)",
-                  wordBreak: "break-all",
-                  lineHeight: 1.4,
-                }}>{c.id}</p>
+            </div>
+
+            <div className="cd-tiles">
+              <div className="cd-tile">
+                <p className="cd-cap cd-row" style={{ gap: 5 }}><CalendarDays size={11} /> Creado</p>
+                <p>{created}</p>
+              </div>
+              <div className="cd-tile">
+                <p className="cd-cap cd-row" style={{ gap: 5 }}><Clock size={11} /> Estimado</p>
+                <p style={{ color: "var(--green)" }}>{c.estimatedTime ? `${c.estimatedTime} h` : "—"}</p>
               </div>
             </div>
 
-            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-              <div className="flex items-center gap-2 mb-1">
-                <Clock size={12} style={{ color: "var(--text-3)", flexShrink: 0 }} />
-                <span className="hint" style={{ fontSize: ".68rem" }}>CREADO</span>
-              </div>
-              <p className="text-sm" style={{ color: "var(--text-2)" }}>
-                {new Date(c.createdAt).toLocaleDateString("es-CO", { day: "2-digit", month: "long", year: "numeric" })}
-              </p>
+            <div className="cd-id">
+              <span className="cd-cap">ID del ticket</span>
+              <code>{c.id}</code>
             </div>
-
-            {c.estimatedTime && (
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-                <p className="hint mb-1" style={{ fontSize: ".68rem" }}>TIEMPO EST.</p>
-                <p className="text-sm font-bold" style={{ color: "var(--cyan)" }}>{c.estimatedTime}h</p>
-              </div>
-            )}
           </div>
 
-          {/* Requester */}
-          <div className="glass-card" style={{ padding: 24 }}>
-            <p className="hint uppercase tracking-widest mb-4" style={{ fontSize: ".7rem" }}>Solicitante</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <div
-                style={{ width: 40, height: 40, borderRadius: 999, flexShrink: 0, background: "var(--cyan-dim)", color: "var(--cyan)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: ".82rem" }}
-              >
-                {c.requester.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
-              </div>
-              <div>
-                <p style={{ fontSize: ".92rem", fontWeight: 700, color: "var(--text-1)" }}>{c.requester.name}</p>
-                <p className="hint" style={{ fontSize: ".76rem" }}>{c.requester.email}</p>
+          <div className="cd-card">
+            <p className="cd-cap">Solicitante</p>
+            <div className="cd-person">
+              <span className="cd-av" style={{ background: "var(--sky-dim)", color: "var(--sky)" }}>
+                {initials(c.requester.name)}
+              </span>
+              <div style={{ minWidth: 0 }}>
+                <p className="cd-name">{c.requester.name}</p>
+                <p className="cd-sub">{c.requester.email}</p>
               </div>
             </div>
-            {c.requester.department && (
-              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                <Building2 size={13} style={{ color: "var(--text-3)" }} />
-                <span className="hint" style={{ fontSize: ".82rem" }}>{c.requester.department}</span>
-              </div>
-            )}
-            {c.requester.phone && (
-              <p className="hint" style={{ marginTop: 6, fontSize: ".82rem", color: "var(--cyan)" }}>{c.requester.phone}</p>
-            )}
+            <div style={{ marginTop: 6 }}>
+              {c.requester.department && <div className="cd-info"><Building2 size={14} /> {c.requester.department}</div>}
+              {c.requester.phone && <div className="cd-info"><Phone size={14} /> {c.requester.phone}</div>}
+            </div>
           </div>
 
-          {/* Assignee */}
-          <div className="glass-card" style={{ padding: 24 }}>
-            <p className="hint uppercase tracking-widest mb-4" style={{ fontSize: ".7rem" }}>Asignado a</p>
+          <div className="cd-card">
+            <p className="cd-cap">Asignado a</p>
             {c.assignedTo ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{ width: 36, height: 36, borderRadius: 999, flexShrink: 0, background: "var(--green-dim)", color: "var(--green)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: ".76rem" }}
-                >
-                  {c.assignedTo.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
+              <div className="cd-person">
+                <span className="cd-av" style={{ background: "var(--green-dim)", color: "var(--green)" }}>
+                  {initials(c.assignedTo.name)}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <p className="cd-name">{c.assignedTo.name}</p>
+                  <p className="cd-sub">{c.assignedTo.email}</p>
                 </div>
-                <p style={{ fontSize: ".92rem", fontWeight: 600, color: "var(--text-1)" }}>{c.assignedTo.name}</p>
               </div>
             ) : (
-              <p className="hint" style={{ fontSize: ".88rem" }}>Sin asignar</p>
+              <div className="cd-person">
+                <span className="cd-av" style={{ background: "var(--surface-2)", color: "var(--text-3)" }}>?</span>
+                <p className="cd-name" style={{ color: "var(--text-3)", fontWeight: 600 }}>Sin asignar</p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* ── Center: description + timeline ── */}
-        <div className="space-y-4">
-          {/* Description */}
-          <div className="glass-card" style={{ padding: 28 }}>
-            <h1 style={{ fontWeight: 900, fontSize: "1.35rem", letterSpacing: "-.02em", lineHeight: 1.2, color: "var(--text-1)", marginBottom: 12 }}>{c.title}</h1>
-            <p style={{ fontSize: ".92rem", lineHeight: 1.7, color: "var(--text-2)" }}>{c.description}</p>
+        {/* ═════ Centro: descripción, escalamiento, actividad ═════ */}
+        <div className="cd-col">
+          <div className="cd-card cd-hero">
+            <div className="cd-hero-bar" />
+            <div className="cd-hero-body">
+              <p className="cd-cap">Descripción del caso</p>
+              <h1 className="cd-title">{c.title}</h1>
+              <p className="cd-desc">{c.description}</p>
+            </div>
           </div>
 
-          {/* Escalation */}
           {c.escalation && (
-            <div
-              className="glass-card fade-in"
-              style={{ padding: 20, border: "1px solid rgba(245,158,11,.3)", background: "var(--amber-dim)" }}
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-xl">🔗</span>
-                <div className="flex-1">
-                  <p className="font-semibold text-sm mb-3" style={{ color: "var(--amber)" }}>
-                    Escalado a proveedor
+            <div className="cd-esc fade-in">
+              <div className="cd-row" style={{ gap: 14 }}>
+                <span className="cd-esc-ico"><Link2 size={18} /></span>
+                <div>
+                  <p style={{ fontSize: ".95rem", fontWeight: 800, color: "#B45309" }}>Escalado a proveedor</p>
+                  <p style={{ fontSize: ".76rem", color: "var(--text-3)" }}>
+                    {c.escalation.provider.name} · {c.escalation.provider.type}
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      ["Proveedor", c.escalation.provider.name],
-                      ["Tipo",      c.escalation.provider.type],
-                      ["Enviado",   new Date(c.escalation.sentAt).toLocaleDateString("es-CO")],
-                      ["Estado",    c.escalation.status],
-                    ].map(([k, v]) => (
-                      <div key={k}>
-                        <p className="hint mb-0.5" style={{ fontSize: ".65rem" }}>{k}</p>
-                        <p className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>{v}</p>
-                      </div>
-                    ))}
-                  </div>
-                  {c.escalation.notes && (
-                    <p className="text-sm mt-3 pt-3" style={{ color: "var(--text-2)", borderTop: "1px solid rgba(245,158,11,.2)" }}>
-                      {c.escalation.notes}
-                    </p>
-                  )}
                 </div>
               </div>
+
+              <div className="cd-esc-grid">
+                {[
+                  ["Proveedor", c.escalation.provider.name],
+                  ["Tipo",      c.escalation.provider.type],
+                  ["Enviado",   new Date(c.escalation.sentAt).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" })],
+                  ["Estado",    ESC_STATUS[c.escalation.status] ?? c.escalation.status],
+                ].map(([k, v]) => (
+                  <div key={k}>
+                    <p className="cd-cap">{k}</p>
+                    <p>{v}</p>
+                  </div>
+                ))}
+              </div>
+
+              {c.escalation.notes && <p className="cd-quote">{c.escalation.notes}</p>}
             </div>
           )}
 
-          {/* Activity feed */}
-          <div className="glass-card" style={{ padding: 28 }}>
-            <p className="hint uppercase tracking-widest" style={{ fontSize: ".7rem", marginBottom: 22 }}>
-              Actividad · {c.updates.length} entrada{c.updates.length !== 1 ? "s" : ""}
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              {c.updates.map((u, i) => {
-                const rs = ROLE_STYLE[u.author.role] ?? { bg: "var(--surface-2)", color: "var(--text-2)" };
-                const initials = u.author.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
-                return (
-                  <div key={u.id} className={`slide-r d${Math.min(i + 1, 6)}`} style={{ display: "flex", gap: 14 }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-                      <div
-                        style={{ width: 36, height: 36, borderRadius: 999, flexShrink: 0, background: rs.bg, color: rs.color, fontSize: ".72rem", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}
-                      >
-                        {initials}
-                      </div>
-                      {i < c.updates.length - 1 && (
-                        <div style={{ width: 1, flex: 1, marginTop: 6, background: "var(--border)", minHeight: 16 }} />
-                      )}
-                    </div>
-                    <div style={{ flex: 1, paddingBottom: 4 }}>
-                      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: ".92rem", fontWeight: 700, color: "var(--text-1)" }}>
-                          {u.author.name}
-                        </span>
-                        {u.newStatus && u.oldStatus !== u.newStatus && <StatusBadge status={u.newStatus} />}
-                        <span className="hint" style={{ marginLeft: "auto", fontSize: ".76rem" }}>
-                          {new Date(u.createdAt).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      </div>
-                      <p
-                        style={{ fontSize: ".88rem", lineHeight: 1.65, padding: "12px 16px", borderRadius: 10, background: "var(--surface-2)", color: "var(--text-2)" }}
-                      >
-                        {u.message}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+          <div className="cd-card" style={{ padding: 28 }}>
+            <div className="cd-row" style={{ justifyContent: "space-between" }}>
+              <p className="cd-cap">Actividad</p>
+              <span className="cd-chip">
+                <MessageSquare size={12} /> {c.updates.length} entrada{c.updates.length !== 1 ? "s" : ""}
+              </span>
             </div>
+
+            {c.updates.length === 0 ? (
+              <div className="cd-empty">Todavía no hay actividad registrada en este caso.</div>
+            ) : (
+              <div className="cd-tl">
+                {c.updates.map((u, i) => {
+                  const rs = ROLE_STYLE[u.author.role] ?? { bg: "var(--surface-2)", color: "var(--text-2)", label: u.author.role };
+                  const moved = u.newStatus && u.oldStatus !== u.newStatus && (u.oldStatus || i === 0);
+                  return (
+                    <div key={u.id} className={`cd-tl-item slide-r d${Math.min(i + 1, 6)}`}>
+                      <span className="cd-tl-av" style={{ background: rs.bg, color: rs.color }}>
+                        {initials(u.author.name)}
+                      </span>
+                      <div className="cd-tl-main">
+                        <div className="cd-tl-head">
+                          <span style={{ fontSize: ".92rem", fontWeight: 700, color: "var(--text-1)" }}>{u.author.name}</span>
+                          <span className="cd-role" style={{ background: rs.bg, color: rs.color }}>{rs.label}</span>
+                          <span className="cd-time">
+                            {new Date(u.createdAt).toLocaleString("es-CO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                        {moved && (
+                          <div className="cd-move">
+                            {u.oldStatus && <><StatusBadge status={u.oldStatus} /><ArrowRight size={13} style={{ color: "var(--text-3)" }} /></>}
+                            <StatusBadge status={u.newStatus!} />
+                          </div>
+                        )}
+                        <p className="cd-bubble">{u.message}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* ── Right: actions ── */}
+        {/* ═════ Derecha: gestión ═════ */}
         <div>
           {user.role !== "REQUESTER" && (
             <CaseActions
               caseId={c.id}
               currentStatus={c.status}
+              priority={c.priority}
+              estimatedHours={c.estimatedTime}
+              elapsedHours={elapsedHours}
+              assignedToName={c.assignedTo?.name ?? null}
               hasEscalation={!!c.escalation}
               userId={user.id}
             />

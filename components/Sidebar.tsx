@@ -6,7 +6,7 @@ import {
   BarChart2, Settings, ChevronLeft, ChevronRight,
   Activity, Plus, Users,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const ALL_NAV = [
   { href: "/dashboard",           icon: LayoutDashboard, label: "Dashboard",  roles: ["REQUESTER", "ANALYST", "MANAGER"] },
@@ -24,6 +24,15 @@ const ROLE_LABEL: Record<string, string> = {
 export default function Sidebar({ userRole, userName }: { userRole: string; userName?: string }) {
   const path      = usePathname();
   const [col, setCol] = useState(false);
+
+  // En pantallas estrechas la barra se contrae sola; el botón sigue permitiendo abrirla a mano.
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 900px)");
+    setCol(mql.matches);
+    const onChange = (e: MediaQueryListEvent) => setCol(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
 
   const nav = ALL_NAV.filter(item => item.roles.includes(userRole));
   const initials = userName
