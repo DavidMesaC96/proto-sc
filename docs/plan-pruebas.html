@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan de Pruebas — Mesa de Servicios · Sistecrédito</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: auto;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: #F4F6F8;
+      color: #0D1B3E;
+      padding: 20px 16px;
+      line-height: 1.6;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #002B7A;
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-left h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -.02em;
+      margin-bottom: 6px;
+    }
+    .header-left p {
+      font-size: .88rem;
+      color: rgba(255,255,255,.6);
+    }
+    .header-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .badge-green  { background: #00C853; color: #002B7A; }
+    .badge-white  { background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.15); }
+
+    /* ── Section ── */
+    .section {
+      background: #ffffff;
+      border: 1px solid rgba(0,43,122,.08);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,43,122,.06);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .section-header {
+      background: #F4F6F8;
+      border-bottom: 1px solid rgba(0,43,122,.08);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .step-pill {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #002B7A;
+      color: #ffffff;
+      font-size: .72rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-header-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #002B7A;
+    }
+    .section-header-sub {
+      font-size: .78rem;
+      color: #6B7280;
+    }
+    .section-body { padding: 24px; }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .84rem;
+    }
+    thead tr {
+      background: #F4F6F8;
+    }
+    th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: .68rem;
+      font-weight: 700;
+      color: #9CA3AF;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0,43,122,.08);
+    }
+    td {
+      padding: 13px 14px;
+      color: #374151;
+      border-bottom: 1px solid rgba(0,43,122,.05);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(0,43,122,.02); }
+
+    /* ── ID pill ── */
+    .id-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: .7rem;
+      font-weight: 800;
+      font-family: monospace;
+      background: rgba(0,43,122,.07);
+      color: #002B7A;
+      white-space: nowrap;
+    }
+
+    /* ── Type badges ── */
+    .type-unit    { background: rgba(99,102,241,.1);  color: #4338CA; }
+    .type-integ   { background: rgba(0,200,83,.1);    color: #007A3D; }
+    .type-system  { background: rgba(245,158,11,.1);  color: #B45309; }
+
+    /* ── Tool badge ── */
+    .tool-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: .68rem;
+      font-weight: 700;
+      background: rgba(0,43,122,.06);
+      color: #002B7A;
+    }
+
+    /* ── Step list inside td ── */
+    .step-list {
+      padding-left: 16px;
+      margin: 0;
+    }
+    .step-list li {
+      margin-bottom: 3px;
+      font-size: .82rem;
+      color: #374151;
+    }
+
+    /* ── Acceptance criteria ── */
+    .criteria-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .criteria-item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,43,122,.07);
+      background: #FAFBFC;
+    }
+    .criteria-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #002B7A;
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .criteria-item p {
+      font-size: .88rem;
+      color: #374151;
+      padding-top: 3px;
+      line-height: 1.5;
+    }
+    .criteria-item code {
+      background: rgba(0,43,122,.07);
+      color: #002B7A;
+      font-size: .78rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+
+    /* ── Result expected ── */
+    .result-box {
+      background: rgba(0,200,83,.07);
+      border: 1px solid rgba(0,200,83,.2);
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: .78rem;
+      color: #007A3D;
+      font-weight: 500;
+    }
+
+    /* ── Precondition ── */
+    .pre-box {
+      background: rgba(0,43,122,.04);
+      border: 1px solid rgba(0,43,122,.08);
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: .78rem;
+      color: #374151;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: .75rem;
+      color: #9CA3AF;
+    }
+    .footer strong { color: #002B7A; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="header-left">
+      <p>Mesa de Servicios · Sistecrédito — Actividad 2</p>
+      <p style="margin-top:6px; font-size:.78rem; color:rgba(255,255,255,.5);">
+        Ingeniería de Requisitos · Fundación Universitaria Católica del Norte
+      </p>
+      <p style="margin-top:10px; font-size:.78rem; color:rgba(255,255,255,.65);">
+        David Mesa Cortés &lt;dmesac@soyucn.edu.co&gt; &nbsp;·&nbsp;
+        Ángela María Ossa Alzate &lt;amossa@soyucn.edu.com&gt;
+      </p>
+    </div>
+    <div class="header-meta">
+      <span class="badge badge-green">Página 3 — Pruebas</span>
+      <span class="badge badge-white">Entrega: 30 oct 2026</span>
+      <span class="badge badge-white">5 casos de prueba</span>
+    </div>
+  </div>
+
+  <!-- ── 3a. Tipos de prueba ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-pill">3a</div>
+      <div>
+        <p class="section-header-title">Tipos de prueba seleccionados</p>
+        <p class="section-header-sub">Estrategia de verificación del sistema</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo de prueba</th>
+            <th>Qué se prueba en el proyecto</th>
+            <th>Herramienta / Técnica</th>
+            <th>Responsable</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="badge type-unit" style="border-radius:6px; padding:3px 10px; font-size:.72rem;">
+                Unitarias
+              </span>
+            </td>
+            <td>Validación de credenciales en el módulo de autenticación (email, contraseña, rol)</td>
+            <td><span class="tool-badge">Jest</span></td>
+            <td style="font-weight:600;">David Mesa Cortés<br/><span style="font-size:.7rem;color:#9CA3AF;font-weight:400;">dmesac@soyucn.edu.co</span></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="badge type-integ" style="border-radius:6px; padding:3px 10px; font-size:.72rem;">
+                Integración
+              </span>
+            </td>
+            <td>Comunicación entre la API <code style="font-family:monospace; background:rgba(0,43,122,.06); padding:1px 5px; border-radius:4px;">/api/cases</code> y la base de datos SQLite a través de Prisma</td>
+            <td><span class="tool-badge">Postman</span></td>
+            <td style="font-weight:600;">David Mesa Cortés<br/><span style="font-size:.7rem;color:#9CA3AF;font-weight:400;">dmesac@soyucn.edu.co</span></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="badge type-system" style="border-radius:6px; padding:3px 10px; font-size:.72rem;">
+                Sistema
+              </span>
+            </td>
+            <td>Flujo completo de un ticket: registro → asignación → cambio de estado → cierre</td>
+            <td><span class="tool-badge">Prueba manual</span></td>
+            <td style="font-weight:600;">Ángela María Ossa Alzate<br/><span style="font-size:.7rem;color:#9CA3AF;font-weight:400;">amossa@soyucn.edu.com</span></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3b. Casos de prueba ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-pill">3b</div>
+      <div>
+        <p class="section-header-title">Casos de prueba</p>
+        <p class="section-header-sub">CP-01 a CP-05 — Cobertura de requisitos funcionales RF-01 a RF-05</p>
+      </div>
+    </div>
+    <div class="section-body" style="padding:0;">
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:56px;">ID</th>
+            <th>Funcionalidad / Requisito</th>
+            <th style="width:100px;">Tipo</th>
+            <th>Precondiciones</th>
+            <th>Pasos y datos de entrada</th>
+            <th>Resultado esperado</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- CP-01 -->
+          <tr>
+            <td><span class="id-pill">CP-01</span></td>
+            <td><strong>Inicio de sesión</strong><br/><span style="font-size:.75rem;color:#9CA3AF;">RF-01</span></td>
+            <td><span class="badge type-system" style="border-radius:6px;padding:2px 8px;font-size:.68rem;">Sistema</span></td>
+            <td>
+              <div class="pre-box">
+                Usuario <code>david.mesacortes@sistecredito.com</code> registrado con rol ANALYST
+              </div>
+            </td>
+            <td>
+              <ol class="step-list">
+                <li>Abrir <code>/login</code></li>
+                <li>Ingresar correo y contraseña <code>password123</code></li>
+                <li>Pulsar <strong>"Ingresar"</strong></li>
+              </ol>
+            </td>
+            <td>
+              <div class="result-box">
+                Se redirige al dashboard con los casos activos visibles en menos de 3 s
+              </div>
+            </td>
+          </tr>
+
+          <!-- CP-02 -->
+          <tr>
+            <td><span class="id-pill">CP-02</span></td>
+            <td><strong>Registro de ticket</strong><br/><span style="font-size:.75rem;color:#9CA3AF;">RF-02</span></td>
+            <td><span class="badge type-system" style="border-radius:6px;padding:2px 8px;font-size:.68rem;">Sistema</span></td>
+            <td>
+              <div class="pre-box">
+                Usuario autenticado con rol REQUESTER
+              </div>
+            </td>
+            <td>
+              <ol class="step-list">
+                <li>Ir a <code>/dashboard/cases/new</code></li>
+                <li>Ingresar título <em>"Fallo en sistema de nómina"</em>, categoría <em>Incidente</em>, prioridad <em>Alta</em></li>
+                <li>Pulsar <strong>"Registrar ticket"</strong></li>
+              </ol>
+            </td>
+            <td>
+              <div class="result-box">
+                El ticket aparece en la lista con estado OPEN y un ID asignado automáticamente
+              </div>
+            </td>
+          </tr>
+
+          <!-- CP-03 -->
+          <tr>
+            <td><span class="id-pill">CP-03</span></td>
+            <td><strong>Listado de casos vía API</strong><br/><span style="font-size:.75rem;color:#9CA3AF;">RF-03</span></td>
+            <td><span class="badge type-integ" style="border-radius:6px;padding:2px 8px;font-size:.68rem;">Integración</span></td>
+            <td>
+              <div class="pre-box">
+                Base de datos con al menos 10 casos registrados
+              </div>
+            </td>
+            <td>
+              <ol class="step-list">
+                <li>Autenticarse como <code>david.mesacortes@sistecredito.com</code></li>
+                <li>Ejecutar <code>GET /api/cases</code> en Postman con cookie de sesión</li>
+              </ol>
+            </td>
+            <td>
+              <div class="result-box">
+                La API retorna un JSON array con los casos ordenados por prioridad y fecha de actualización
+              </div>
+            </td>
+          </tr>
+
+          <!-- CP-04 -->
+          <tr>
+            <td><span class="id-pill">CP-04</span></td>
+            <td><strong>Cambio de estado de ticket</strong><br/><span style="font-size:.75rem;color:#9CA3AF;">RF-04</span></td>
+            <td><span class="badge type-integ" style="border-radius:6px;padding:2px 8px;font-size:.68rem;">Integración</span></td>
+            <td>
+              <div class="pre-box">
+                Ticket con ID existente en estado OPEN
+              </div>
+            </td>
+            <td>
+              <ol class="step-list">
+                <li>Autenticarse como ANALYST</li>
+                <li>Ir al detalle del ticket</li>
+                <li>Seleccionar estado <em>"En gestión"</em></li>
+                <li>Agregar comentario <em>"Revisando con el área"</em></li>
+                <li>Guardar</li>
+              </ol>
+            </td>
+            <td>
+              <div class="result-box">
+                El estado cambia a IN_PROGRESS y el comentario queda registrado en el historial
+              </div>
+            </td>
+          </tr>
+
+          <!-- CP-05 -->
+          <tr>
+            <td><span class="id-pill">CP-05</span></td>
+            <td><strong>Escalamiento a proveedor</strong><br/><span style="font-size:.75rem;color:#9CA3AF;">RF-05</span></td>
+            <td><span class="badge type-system" style="border-radius:6px;padding:2px 8px;font-size:.68rem;">Sistema</span></td>
+            <td>
+              <div class="pre-box">
+                Ticket en estado IN_PROGRESS sin escalamiento previo
+              </div>
+            </td>
+            <td>
+              <ol class="step-list">
+                <li>Ir al detalle del ticket</li>
+                <li>Seleccionar pestaña <strong>"Escalar"</strong></li>
+                <li>Elegir proveedor <em>CloudTech Services</em></li>
+                <li>Agregar nota <em>"Requiere soporte de infraestructura"</em></li>
+                <li>Confirmar</li>
+              </ol>
+            </td>
+            <td>
+              <div class="result-box">
+                El ticket cambia a WAITING_PROVIDER y el proveedor queda vinculado al caso
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3c. Criterios de aceptación ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="step-pill">3c</div>
+      <div>
+        <p class="section-header-title">Criterios de aceptación del software</p>
+        <p class="section-header-sub">Condiciones mínimas para aprobar la entrega</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="criteria-list">
+
+        <div class="criteria-item">
+          <div class="criteria-num">1</div>
+          <p>
+            El <strong>100 % de los casos de prueba</strong> CP-01 a CP-05 deben ejecutarse sin errores bloqueantes.
+          </p>
+        </div>
+
+        <div class="criteria-item">
+          <div class="criteria-num">2</div>
+          <p>
+            El tiempo de respuesta del dashboard principal con <strong>100 casos cargados</strong> debe ser inferior a
+            <strong>3 000 ms</strong> (Métrica M-02).
+          </p>
+        </div>
+
+        <div class="criteria-item">
+          <div class="criteria-num">3</div>
+          <p>
+            Ningún usuario con rol <strong>REQUESTER</strong> puede acceder a rutas restringidas de ANALYST o MANAGER:
+            <code>/dashboard/incidents</code> y <code>/dashboard/reports</code>.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="footer">
+    <strong>Mesa de Servicios · Sistecrédito</strong> &nbsp;·&nbsp;
+    David Mesa Cortés &nbsp;·&nbsp; Ángela María Ossa Alzate &nbsp;·&nbsp;
+    Ingeniería de Requisitos · Fundación Universitaria Católica del Norte
+  </div>
+
+  <script>
+    /* Notifica al iframe padre la altura real del contenido
+       para que Google Sites pueda expandirse automáticamente */
+    function notifyHeight() {
+      const h = document.documentElement.scrollHeight;
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: "setHeight", height: h }, "*");
+      }
+    }
+    /* Dispara al cargar y cada vez que el contenido cambie de tamaño */
+    window.addEventListener("load", notifyHeight);
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(notifyHeight).observe(document.body);
+    }
+  </script>
+
+</body>
+</html>

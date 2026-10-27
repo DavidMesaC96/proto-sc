@@ -1,0 +1,306 @@
+{
+  "info": {
+    "name": "Mesa de Servicios — Sistecrédito",
+    "description": "Colección de pruebas para los casos CP-01 a CP-05 de la Actividad 2.\nEjecuta CP-01 primero para obtener la sesión automáticamente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "session_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "case_id_open",
+      "value": "cmvmxs2uk000sjziu03i0lj2n",
+      "type": "string"
+    },
+    {
+      "key": "case_id_in_progress",
+      "value": "cmvmxs2ue000ljziuscqu4c9w",
+      "type": "string"
+    },
+    {
+      "key": "provider_id",
+      "value": "cmvmxs2u5000ejziu4hls0n37",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "AUTH",
+      "item": [
+        {
+          "name": "CP-01 — Inicio de sesión (Analista)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Extrae la cookie de sesión y la guarda como variable",
+                  "const cookies = pm.response.headers.get('Set-Cookie');",
+                  "if (cookies) {",
+                  "  const match = cookies.match(/session=([^;]+)/);",
+                  "  if (match) {",
+                  "    pm.collectionVariables.set('session_token', match[1]);",
+                  "    console.log('✅ Sesión guardada:', match[1].substring(0, 20) + '...');",
+                  "  }",
+                  "}",
+                  "",
+                  "pm.test('CP-01 · Respuesta exitosa (200)', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('CP-01 · Retorna datos del usuario', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('name');",
+                  "  pm.expect(body).to.have.property('role');",
+                  "  pm.expect(body.role).to.eql('ANALYST');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"david.mesacortes@sistecredito.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "RF-01 · Autenticación de usuario con rol ANALYST.\nResultado esperado: 200 OK con datos del usuario y cookie de sesión.\nEl script guarda el token automáticamente para los demás requests."
+          }
+        },
+        {
+          "name": "CP-01b — Inicio de sesión (REQUESTER para prueba de acceso)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('CP-01b · Login REQUESTER exitoso (200)', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('CP-01b · Rol es REQUESTER', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.role).to.eql('REQUESTER');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria.garcia@sistecredito.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login con usuario REQUESTER. Usado para validar CP criterio 3 (acceso restringido)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "CASOS",
+      "item": [
+        {
+          "name": "CP-03 — Listar todos los casos (GET /api/cases)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('CP-03 · Respuesta exitosa (200)', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('CP-03 · Retorna un array de casos', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.be.an('array');",
+                  "  pm.expect(body.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test('CP-03 · Cada caso tiene campos requeridos', () => {",
+                  "  const body = pm.response.json();",
+                  "  const caso = body[0];",
+                  "  pm.expect(caso).to.have.property('id');",
+                  "  pm.expect(caso).to.have.property('title');",
+                  "  pm.expect(caso).to.have.property('status');",
+                  "  pm.expect(caso).to.have.property('priority');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Cookie", "value": "session={{session_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cases",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cases"]
+            },
+            "description": "RF-03 · Lista todos los casos desde la base de datos.\nResultado esperado: JSON array ordenado con todos los casos."
+          }
+        },
+        {
+          "name": "CP-04 — Cambiar estado de ticket a IN_PROGRESS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('CP-04 · Actualización exitosa (200)', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('CP-04 · Estado cambia a IN_PROGRESS', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.status).to.eql('IN_PROGRESS');",
+                  "});",
+                  "",
+                  "pm.test('CP-04 · El ID del caso coincide', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.id).to.eql(pm.collectionVariables.get('case_id_open'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "session={{session_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\",\n  \"comment\": \"Revisando con el área\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cases/{{case_id_open}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cases", "{{case_id_open}}"]
+            },
+            "description": "RF-04 · Cambia el estado de un ticket OPEN a IN_PROGRESS y registra un comentario.\nResultado esperado: 200 OK con el caso actualizado."
+          }
+        },
+        {
+          "name": "CP-05 — Escalar ticket a proveedor (CloudTech Services)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('CP-05 · Escalamiento exitoso (200 o 201)', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('CP-05 · Estado cambia a WAITING_PROVIDER', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.status).to.eql('WAITING_PROVIDER');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "session={{session_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"providerId\": \"{{provider_id}}\",\n  \"note\": \"Requiere soporte de infraestructura\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/cases/{{case_id_in_progress}}/escalate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cases", "{{case_id_in_progress}}", "escalate"]
+            },
+            "description": "RF-05 · Escala un ticket a CloudTech Services.\nResultado esperado: estado cambia a WAITING_PROVIDER y el proveedor queda vinculado."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUXILIARES",
+      "item": [
+        {
+          "name": "Listar proveedores",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Cookie", "value": "session={{session_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/providers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "providers"]
+            },
+            "description": "Obtiene los IDs de los proveedores disponibles. Útil para CP-05."
+          }
+        },
+        {
+          "name": "Ver detalle de un caso",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Cookie", "value": "session={{session_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cases/{{case_id_open}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cases", "{{case_id_open}}"]
+            },
+            "description": "Verifica el estado actual de un caso específico."
+          }
+        },
+        {
+          "name": "Cerrar sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Cookie", "value": "session={{session_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Invalida la sesión activa."
+          }
+        }
+      ]
+    }
+  ]
+}

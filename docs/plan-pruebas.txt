@@ -1,0 +1,94 @@
+================================================================
+PLAN DE PRUEBAS — MESA DE SERVICIOS · SISTECRÉDITO
+Actividad 2 — Ingeniería de Requisitos
+Fundación Universitaria Católica del Norte
+
+Integrantes:
+  David Mesa Cortés       dmesac@soyucn.edu.co
+  Ángela María Ossa Alzate   amossa@soyucn.edu.com
+
+Entrega: 30 de octubre de 2026
+================================================================
+
+
+----------------------------------------------------------------
+3a. TIPOS DE PRUEBA SELECCIONADOS
+----------------------------------------------------------------
+
+TIPO          QUÉ SE PRUEBA                                         HERRAMIENTA    RESPONSABLE
+------------  ----------------------------------------------------  -------------  --------------------------
+Unitarias     Validación de credenciales en el módulo de            Jest           David Mesa Cortés
+              autenticación (email, contraseña, rol)                               dmesac@soyucn.edu.co
+
+Integración   Comunicación entre la API /api/cases y la base        Postman        David Mesa Cortés
+              de datos SQLite a través de Prisma                                   dmesac@soyucn.edu.co
+
+Sistema       Flujo completo de un ticket: registro →               Prueba manual  Ángela María Ossa Alzate
+              asignación → cambio de estado → cierre                               amossa@soyucn.edu.com
+
+
+----------------------------------------------------------------
+3b. CASOS DE PRUEBA
+----------------------------------------------------------------
+
+CP-01 | Inicio de sesión | Sistema | RF-01
+  Precondición:    Usuario david.mesacortes@sistecredito.com registrado con rol ANALYST
+  Pasos:           1. Abrir /login
+                   2. Ingresar correo y contraseña password123
+                   3. Pulsar "Ingresar"
+  Resultado esp.:  Se redirige al dashboard con los casos activos visibles en menos de 3 s
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+CP-02 | Registro de ticket | Sistema | RF-02
+  Precondición:    Usuario autenticado con rol REQUESTER
+  Pasos:           1. Ir a /dashboard/cases/new
+                   2. Ingresar título "Fallo en sistema de nómina", categoría Incidente, prioridad Alta
+                   3. Pulsar "Registrar ticket"
+  Resultado esp.:  El ticket aparece en la lista con estado OPEN y un ID asignado automáticamente
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+CP-03 | Listado de casos vía API | Integración | RF-03
+  Precondición:    Base de datos con al menos 10 casos registrados
+  Pasos:           1. Autenticarse como david.mesacortes@sistecredito.com
+                   2. Ejecutar GET /api/cases en Postman con cookie de sesión
+  Resultado esp.:  La API retorna un JSON array con los casos ordenados por prioridad y fecha
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+CP-04 | Cambio de estado de ticket | Integración | RF-04
+  Precondición:    Ticket con ID existente en estado OPEN
+  Pasos:           1. Autenticarse como ANALYST
+                   2. Ir al detalle del ticket
+                   3. Seleccionar estado "En gestión"
+                   4. Agregar comentario "Revisando con el área"
+                   5. Guardar
+  Resultado esp.:  El estado cambia a IN_PROGRESS y el comentario queda registrado en el historial
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+CP-05 | Escalamiento a proveedor | Sistema | RF-05
+  Precondición:    Ticket en estado IN_PROGRESS sin escalamiento previo
+  Pasos:           1. Ir al detalle del ticket
+                   2. Seleccionar pestaña "Escalar"
+                   3. Elegir proveedor CloudTech Services
+                   4. Agregar nota "Requiere soporte de infraestructura"
+                   5. Confirmar
+  Resultado esp.:  El ticket cambia a WAITING_PROVIDER y el proveedor queda vinculado al caso
+
+
+----------------------------------------------------------------
+3c. CRITERIOS DE ACEPTACIÓN
+----------------------------------------------------------------
+
+1. El 100 % de los casos de prueba CP-01 a CP-05 deben ejecutarse sin errores bloqueantes.
+
+2. El tiempo de respuesta del dashboard principal con 100 casos cargados debe ser
+   inferior a 3 000 ms (Métrica M-02).
+
+3. Ningún usuario con rol REQUESTER puede acceder a rutas restringidas de ANALYST
+   o MANAGER: /dashboard/incidents y /dashboard/reports.
+
+
+================================================================

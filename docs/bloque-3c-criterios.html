@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; background: transparent; padding: 0; }
+
+  .lista { display: flex; flex-direction: column; gap: 10px; }
+
+  .item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border: 1px solid rgba(0,43,122,.09);
+    border-radius: 10px;
+    background: #FAFBFC;
+  }
+
+  .num {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #002B7A;
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .texto {
+    font-size: .86rem;
+    color: #374151;
+    line-height: 1.6;
+    padding-top: 3px;
+  }
+
+  code {
+    font-size: .78rem;
+    background: rgba(0,43,122,.07);
+    color: #002B7A;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+<div class="lista">
+
+  <div class="item">
+    <div class="num">1</div>
+    <p class="texto">
+      El <strong>100 % de los casos de prueba</strong> CP-01 a CP-05 deben ejecutarse sin errores bloqueantes.
+    </p>
+  </div>
+
+  <div class="item">
+    <div class="num">2</div>
+    <p class="texto">
+      El tiempo de respuesta del dashboard principal con <strong>100 casos cargados</strong>
+      debe ser inferior a <strong>3 000 ms</strong> (Métrica M-02).
+    </p>
+  </div>
+
+  <div class="item">
+    <div class="num">3</div>
+    <p class="texto">
+      Ningún usuario con rol <strong>REQUESTER</strong> puede acceder a rutas restringidas
+      de ANALYST o MANAGER: <code>/dashboard/incidents</code> y <code>/dashboard/reports</code>.
+    </p>
+  </div>
+
+</div>
+</body></html>

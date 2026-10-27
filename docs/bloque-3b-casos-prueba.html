@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; background: transparent; padding: 0; }
+
+  .casos { display: flex; flex-direction: column; gap: 12px; }
+
+  .caso {
+    border: 1px solid rgba(0,43,122,.1);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .caso-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #F4F6F8;
+    border-bottom: 1px solid rgba(0,43,122,.08);
+  }
+
+  .id {
+    font-family: monospace;
+    font-size: .72rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(0,43,122,.08);
+    color: #002B7A;
+    white-space: nowrap;
+  }
+
+  .titulo { font-weight: 700; font-size: .88rem; color: #0D1B3E; }
+  .rf     { font-size: .72rem; color: #9CA3AF; margin-left: auto; white-space: nowrap; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 700;
+  }
+  .system { background: rgba(245,158,11,.1); color: #B45309; }
+  .integ  { background: rgba(0,200,83,.1);   color: #007A3D; }
+
+  .caso-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+
+  .col {
+    padding: 14px 16px;
+    border-right: 1px solid rgba(0,43,122,.06);
+    font-size: .8rem;
+    color: #374151;
+  }
+  .col:last-child { border-right: none; }
+
+  .col-label {
+    font-size: .62rem;
+    font-weight: 700;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+  }
+
+  ol { padding-left: 16px; }
+  ol li { margin-bottom: 4px; font-size: .78rem; }
+
+  code {
+    font-size: .73rem;
+    background: rgba(0,43,122,.07);
+    color: #002B7A;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  .pre {
+    background: rgba(0,43,122,.04);
+    border: 1px solid rgba(0,43,122,.08);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: .78rem;
+    color: #374151;
+    line-height: 1.5;
+  }
+
+  .res {
+    background: rgba(0,200,83,.06);
+    border: 1px solid rgba(0,200,83,.2);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: .78rem;
+    color: #007A3D;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="casos">
+
+  <!-- CP-01 -->
+  <div class="caso">
+    <div class="caso-head">
+      <span class="id">CP-01</span>
+      <span class="titulo">Inicio de sesión</span>
+      <span class="badge system">Sistema</span>
+      <span class="rf">RF-01</span>
+    </div>
+    <div class="caso-body">
+      <div class="col">
+        <div class="col-label">Precondición</div>
+        <div class="pre">Usuario <code>david.mesacortes@sistecredito.com</code> registrado con rol ANALYST</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Pasos</div>
+        <ol>
+          <li>Abrir <code>/login</code></li>
+          <li>Ingresar correo y contraseña <code>password123</code></li>
+          <li>Pulsar <strong>"Ingresar"</strong></li>
+        </ol>
+      </div>
+      <div class="col">
+        <div class="col-label">Resultado esperado</div>
+        <div class="res">Se redirige al dashboard con los casos activos visibles en menos de 3 s</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CP-02 -->
+  <div class="caso">
+    <div class="caso-head">
+      <span class="id">CP-02</span>
+      <span class="titulo">Registro de ticket</span>
+      <span class="badge system">Sistema</span>
+      <span class="rf">RF-02</span>
+    </div>
+    <div class="caso-body">
+      <div class="col">
+        <div class="col-label">Precondición</div>
+        <div class="pre">Usuario autenticado con rol REQUESTER</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Pasos</div>
+        <ol>
+          <li>Ir a <code>/dashboard/cases/new</code></li>
+          <li>Título: <em>"Fallo en sistema de nómina"</em>, categoría: Incidente, prioridad: Alta</li>
+          <li>Pulsar <strong>"Registrar ticket"</strong></li>
+        </ol>
+      </div>
+      <div class="col">
+        <div class="col-label">Resultado esperado</div>
+        <div class="res">El ticket aparece en la lista con estado OPEN y un ID asignado automáticamente</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CP-03 -->
+  <div class="caso">
+    <div class="caso-head">
+      <span class="id">CP-03</span>
+      <span class="titulo">Listado de casos vía API</span>
+      <span class="badge integ">Integración</span>
+      <span class="rf">RF-03</span>
+    </div>
+    <div class="caso-body">
+      <div class="col">
+        <div class="col-label">Precondición</div>
+        <div class="pre">Base de datos con al menos 10 casos registrados</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Pasos</div>
+        <ol>
+          <li>Autenticarse como <code>david.mesacortes@sistecredito.com</code></li>
+          <li>Ejecutar <code>GET /api/cases</code> en Postman con cookie de sesión</li>
+        </ol>
+      </div>
+      <div class="col">
+        <div class="col-label">Resultado esperado</div>
+        <div class="res">La API retorna un JSON array con los casos ordenados por prioridad y fecha</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CP-04 -->
+  <div class="caso">
+    <div class="caso-head">
+      <span class="id">CP-04</span>
+      <span class="titulo">Cambio de estado de ticket</span>
+      <span class="badge integ">Integración</span>
+      <span class="rf">RF-04</span>
+    </div>
+    <div class="caso-body">
+      <div class="col">
+        <div class="col-label">Precondición</div>
+        <div class="pre">Ticket con ID existente en estado OPEN</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Pasos</div>
+        <ol>
+          <li>Autenticarse como ANALYST</li>
+          <li>Ir al detalle del ticket</li>
+          <li>Seleccionar estado <em>"En gestión"</em></li>
+          <li>Agregar comentario <em>"Revisando con el área"</em></li>
+          <li>Guardar</li>
+        </ol>
+      </div>
+      <div class="col">
+        <div class="col-label">Resultado esperado</div>
+        <div class="res">El estado cambia a IN_PROGRESS y el comentario queda registrado en el historial</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CP-05 -->
+  <div class="caso">
+    <div class="caso-head">
+      <span class="id">CP-05</span>
+      <span class="titulo">Escalamiento a proveedor</span>
+      <span class="badge system">Sistema</span>
+      <span class="rf">RF-05</span>
+    </div>
+    <div class="caso-body">
+      <div class="col">
+        <div class="col-label">Precondición</div>
+        <div class="pre">Ticket en estado IN_PROGRESS sin escalamiento previo</div>
+      </div>
+      <div class="col">
+        <div class="col-label">Pasos</div>
+        <ol>
+          <li>Ir al detalle del ticket</li>
+          <li>Seleccionar pestaña <strong>"Escalar"</strong></li>
+          <li>Elegir proveedor <em>CloudTech Services</em></li>
+          <li>Agregar nota <em>"Requiere soporte de infraestructura"</em></li>
+          <li>Confirmar</li>
+        </ol>
+      </div>
+      <div class="col">
+        <div class="col-label">Resultado esperado</div>
+        <div class="res">El ticket cambia a WAITING_PROVIDER y el proveedor queda vinculado al caso</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body></html>
